@@ -1,0 +1,85 @@
+/* ── SCENE BASE ── */
+
+.scene {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center; 
+    opacity: 0;
+    transform: translateY(18px);
+    transition: opacity 0.5s ease, transform 0.5s ease;
+    overflow: hidden;
+}
+
+.scene:not(.hidden) {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.scene.fade-out {
+    opacity: 0;
+    transform: translateY(-18px);
+}
+
+.hidden {
+    display: none;
+}
+
+/* ── BUTTONS ── */
+
+.primary-btn {
+    padding: 11px 24px;
+    background: var(--blue);
+    color: var(--text);
+    border: 1px solid var(--border-s);
+    border-radius: 3px;
+    font-family: var(--font-primary);
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+}
+
+.primary-btn:hover {
+    background: var(--blue-light);
+    color: var(--bg);
+    border-color: var(--blue-light);
+}
+
+.primary-btn:active {
+    transform: scale(0.97);
+}
+
+.primary-btn:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+    filter: none;
+}
+
+.secondary-btn {
+    padding: 10px 24px;
+    background: transparent;
+    color: var(--text3);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    font-family: var(--font-primary);
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.18s;
+}
+
+.secondary-btn:hover {
+    border-color: var(--border-s);
+    color: var(--text);
+    background: var(--p1bg);
+}
+
+
+

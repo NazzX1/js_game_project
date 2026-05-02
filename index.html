@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Border pioneer</title>
+    <link rel="stylesheet" href="./css/game.css">
+    <link rel="stylesheet" href="./css/home.css">
+    <link rel="stylesheet" href="./css/variables.css">
+    <link rel="stylesheet" href="./css/common.css">
+    <link rel="stylesheet" href="./css/animations.css">
+    <link rel="stylesheet" href="./css/modals.css">
+    
+</head>
+<body>
+    <div class="game-container">
+
+
+        <div id="home-scene" class="scene">
+            <div class="title">
+                <div class="main-title">
+                <h1>Border Pioneer</h1>
+                <div>
+                <img src="./assets/sword.png" alt="" width="50px">
+                <p>A Strategic War Of Empires</p>
+                <img src="./assets/sword.png" alt="" width="50px">
+                </div>
+                </div>
+            <img src="./assets/Avatars_21.png" alt="">
+            <div class="desc">
+                <p>two empires</p>
+                <p>One board</p>
+                <p>No mercy</p>
+            </div>
+            </div>
+
+
+            <div class="mode">
+                <button class="mode-btn selected" id="single-player-btn">PvP</button>
+                <button class="mode-btn" id="multi-player-btn">vs AI</button>
+            </div>
+            <div class="menu">
+                <button class="primary-btn" id="start-btn">Start Game</button>
+                <button class="secondary-btn" id="settings-btn">Settings</button>
+            </div>
+
+
+            <div id="settings-container" class="container-bg">
+            <div class="settings-panel">
+                <h1 class="settings-title">Settings</h1>
+                <div class="setting-1 seg-row">
+                    <span class="setting-label">IA difficulty</span>
+                    <div class="setting-control">
+                        <button class="seg-btn" data-key="diff">Easy</button>
+                        <button class="seg-btn active" data-key="diff">Medium</button>
+                        <button class="seg-btn" data-key="diff">Hard</button>
+                    </div>
+                </div>
+                <div class="setting-2 seg-row">
+                    <span class="setting-label">Timer per turn</span>
+                    <div class="setting-control">
+                        <button class="seg-btn active" data-key="timer">Off</button>
+                        <button class="seg-btn" data-key="timer">30s</button>
+                        <button class="seg-btn" data-key="timer">60s</button>
+                    </div>
+                </div>
+                <div id="seg-group-btn">
+                    <button class="primary-btn" id="settings-confirm-btn">Confirm</button>
+                    <button class="primary-btn" id="settings-back-btn">Back</button>
+                </div>
+                
+                
+            </div>
+        </div>
+        </div>
+
+
+
+        <div id="game-scene" class="scene hidden" >
+            <div class="left-panel">
+                <div class="territory-block">
+                <div class="panel-label">Territory</div>
+                
+                </div>
+
+                <div class="timer-block">
+                    <div class="timer-display" id="timer-display">16s</div>
+                </div>
+
+                
+                <div class="active-player-block">
+                    <div class="panel-label">Active Player</div>
+                    <div class="active-player-card p1" id="active-player-card">
+                        <div><div class="active-player-name" id="active-player-name">Alice</div><div class="active-player-role" id="active-player-role">Player 1 </div></div>
+                    </div>
+            
+                </div>
+                <div class="panel-actions">
+                    <button class="primary-btn" id="end-turn-btn">Fin de Tour </button>
+                    <button class="secondary-btn" id="menu-btn">Menu</button>
+                </div>
+            </div>
+            <canvas id="game-canvas" class="game-canvas"></canvas>
+            <div class="right-panel">
+                <div class="panel-label">Actions</div>
+                <div class="action-btns">
+                    <button class="act-btn act-attack" id="btn-attack" disabled>
+                        <span class="act-icon">⚔</span><span class="act-text">Attaquer</span><span class="act-shortcut">A</span>
+                    </button>
+                    <button class="act-btn act-defend" id="btn-defend" disabled>
+                        <span class="act-icon">🛡</span><span class="act-text">Défendre</span><span class="act-shortcut">D</span>
+                    </button>
+                    <button class="act-btn act-capture" id="btn-capture" disabled>
+                        <span class="act-icon">⚑</span><span class="act-text">Capturer</span><span class="act-shortcut">C</span>
+                    </button>
+                </div>
+            </div>
+            
+
+        </div>
+
+
+    </div>
+    <script type="module" src="main.js"></script>
+</body>
+</html>

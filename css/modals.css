@@ -1,0 +1,14 @@
+.container-bg {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    background: rgba(39, 48, 59, 0.267);
+    backdrop-filter: blur(1px);
+    display: none;
+    align-items: center;
+    justify-content: center;
+}
+
+.container-bg.open {
+    display: flex;
+}

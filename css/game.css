@@ -1,0 +1,122 @@
+#game-scene {
+    flex-direction: row ;
+    align-items: stretch;
+    justify-content: center;
+}
+
+
+
+
+#game-canvas {
+    display: block;
+    max-width: min(calc(100vw - 50px), 60vw);
+    max-height: calc(100vh - 10px);
+    width: 100vw;
+    height: 100vh;
+    cursor: pointer;
+    outline: 1px solid var(--border);
+    outline-offset: 2px;
+    
+}
+
+
+
+.right-panel {
+    width: 20vw;
+    background: var(--surface);
+    border-left: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    gap: 5rem;
+    z-index: 1;
+    padding: 2%;
+    overflow-y: auto;
+}
+
+
+.left-panel {
+    width: 20vw;
+    background: var(--surface);
+    border-left: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 1rem;
+    z-index: 1;
+    padding: 2%;
+    overflow-y: auto;
+}
+
+.action-block {
+    
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border);
+}
+
+.action-btns {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.act-btn {
+    background-image: url("../assets/Banner_Slots.png");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    padding: 9px 12px;
+    font-family: var(--font-primary);
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.18s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    text-align: left;
+}
+
+.act-btn:disabled {
+    opacity: 0.25;
+    cursor: not-allowed;
+}
+
+.panel-actions {
+    
+    justify-content: flex-end;
+    padding: 10px 14px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    order: 2;
+    background: var(--card);
+}
+
+.territory-block {
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border);
+    order: -3;
+}
+
+
+
+.timer-block {
+    padding: 8px 14px;
+    border-bottom: 1px solid var(--border);
+    text-align: center;
+    order: -2;
+    background: var(--card);
+}
+
+.active-player-block {
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border);
+    order: -1;
+}
+
+#end-turn-btn, #menu-btn {
+    font-size: 13px;
+}

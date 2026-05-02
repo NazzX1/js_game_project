@@ -1,0 +1,81 @@
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+*, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+:root {
+    --bg:           #080b0d;
+    --surface:      #0a0f14;
+    --card:         #0f161e;
+    --card2:        #141f2a;
+    --card3:        #1a2736;
+
+    --blue:         #012e55;
+    --blue-light:   #0095ff;
+    --blue-dark:    #00264d;
+    --blue-deeper:  #071929;
+    --p1:           #5ba8e0;
+    --p1bg:         rgba(43,110,166,0.16);
+    --p1border:     rgba(91,168,224,0.38);
+
+    --red:          #a32a20;
+    --red-light:    #d95f52;
+    --red-dark:     #2a0a08;
+    --p2:           #d95f52;
+    --p2bg:         rgba(163,42,32,0.16);
+    --p2border:     rgba(217,95,82,0.38);
+
+    --green:        #3a7d40;
+    --green-light:  #5aaa62;
+    --greenbg:      rgba(58,125,64,0.16);
+
+    --amber:        #c88a1a;
+    --amber-light:  #f0c050;
+    --amberbg:      rgba(200,138,26,0.16);
+
+    --earth-dark:   #0e1208;
+    --earth:        #121608;
+    --earth-mid:    #2a3010;
+
+    --gold:         #fbff00;
+    --gold-light:   #f0c050;
+    --gold-dim:     #5a4010;
+
+    --border:       rgba(46,110,166,0.18);
+    --border-s:     rgba(91,168,224,0.36);
+    --border-earth: rgba(42,48,16,0.60);
+
+    --text:         #c8dff0;
+    --text2:        #6a8fa8;
+    --text3:        #2e4a5a;
+
+    --font-primary: "Press Start 2P", system-ui;
+    --font-mono:    'Share Tech Mono', monospace;
+}
+
+html, body {
+    height: 100%;
+    color: var(--text);
+    font-family: var(--font-primary);
+    font-size: 15px;
+    overflow: hidden;
+    background-image: url("../assets/home.png");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+
+.bg-grid {
+    position: absolute;
+    inset: 0;
+    background-image:
+        linear-gradient(rgba(91,168,224,0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(91,168,224,0.04) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+}
+
