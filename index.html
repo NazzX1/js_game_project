@@ -80,21 +80,27 @@
         <div id="game-scene" class="scene hidden" >
             <div class="left-panel">
                 <div class="territory-block">
-                <div class="panel-label">Territory</div>
-                
+                <div class="panel-label">Territory Control</div>
+                <div class="timer-block">
+                    <div id="timer-display">16s</div>
+                </div>
                 </div>
 
-                <div class="timer-block">
-                    <div class="timer-display" id="timer-display">16s</div>
-                </div>
+                
 
                 
                 <div class="active-player-block">
                     <div class="panel-label">Active Player</div>
                     <div class="active-player-card p1" id="active-player-card">
-                        <div><div class="active-player-name" id="active-player-name">Alice</div><div class="active-player-role" id="active-player-role">Player 1 </div></div>
+                        <div class="active-player-role active-player" id="active-player-role">Player 1 </div>
+                        <div class="active-player-role" id="active-player-role">Player 2 </div>
                     </div>
-            
+                </div>
+                <div class="units">
+                    <h1>Available units :</h1>
+                    <div class="tank"></div>
+                    <div class="soldier"></div>
+                    <div class="rider"></div>
                 </div>
                 <div class="panel-actions">
                     <button class="primary-btn" id="end-turn-btn">Fin de Tour </button>
@@ -103,8 +109,8 @@
             </div>
             <canvas id="game-canvas" class="game-canvas"></canvas>
             <div class="right-panel">
-                <div class="panel-label">Actions</div>
                 <div class="action-btns">
+                    <div class="panel-label">Actions</div>
                     <button class="act-btn act-attack" id="btn-attack" disabled>
                         <span class="act-icon">⚔</span><span class="act-text">Attaquer</span><span class="act-shortcut">A</span>
                     </button>

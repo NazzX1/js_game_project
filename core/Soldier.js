@@ -1,0 +1,66 @@
+import { Unit } from "./Unit.js";
+import { UnitType } from "../data/Enums.js";
+
+
+
+export class Soldier extends Unit {
+    constructor(player, x, y) {
+        const stats = {
+            label: 'S',
+            name: 'Soldier',
+            move: 2,
+            force: 1
+        };
+        super(UnitType.SOLDIER, stats, player, x, y);
+    }
+
+
+
+
+    render(ctx, cellSize) {
+        ctx.fillStyle = this.player === 1 ? 'blue' : 'red';
+        ctx.fillRect(this.x * cellSize + 10, this.y * cellSize + 10, cellSize - 20, cellSize - 20);
+        ctx.fillStyle = 'white';
+        ctx.font = '16px Arial';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(this.label, this.x * cellSize + cellSize / 2, this.y * cellSize + cellSize / 2);
+    }
+
+
+    attack(target) {
+        if (this.hasActed) return false;
+        if (!target || !target.alive || target.player === this.player) return false;
+
+        const distance = Math.abs(this.x - target.x) + Math.abs(this.y - target.y);
+        if (distance > 1) return false;
+
+        target.force -= this.force;
+        if (target.force <= 0) {
+            target.alive = false;
+            target.force = 0;
+        }
+
+        this.hasActed = true;
+        return true;
+    }
+
+    move(targetX, targetY, grid) {
+        if (this.hasMoved) return false;
+        const distance = Math.abs(this.x - targetX) + Math.abs(this.y - targetY);
+        if (distance > this.moveRange) return false;
+
+        const targetCell = grid.matrix[targetY][targetX];
+        if (targetCell.owner !== 0 && targetCell.owner !== this.player) return false;
+
+        grid.matrix[this.y][this.x].units = grid.matrix[this.y][this.x].units.filter(u => u !== this);
+        this.x = targetX;
+        this.y = targetY;
+        targetCell.units.push(this);
+        targetCell.owner = this.player;
+
+        this.hasMoved = true;
+        return true;
+    }
+    
+}

@@ -28,8 +28,7 @@ export class GameScene extends Scene {
         this.renderer = new Renderer('game-canvas', this.logic.config.gridSize);
         this.vsAI     = this.app.vsAI !== false;
         
-
-        
+        this.renderer.loadUnitAssets(this.logic.level);
     }
 
     onExit() {

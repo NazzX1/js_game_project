@@ -43,6 +43,7 @@ export class Renderer {
 
         this.animations    = [];   
         this.tileLibrary   = [];
+        this.unitAssets    = {};
         this.pulseTime     = 0;
         this.hoveredCell   = null; 
         this.isReady       = false;
@@ -99,9 +100,12 @@ export class Renderer {
             }
 
             if (cell.units && cell.units.length > 0) {
-                const unit = cell.units[0]; 
-                const unitIdx = unit.owner === 1 ? 10 : 11; 
-                ctx.drawImage(this.tileLibrary[unitIdx], px, py, cs, cs);
+                const unit = cell.units[0];
+                const assetPath = gm.level.units[unit.type]?.asset;
+                if (assetPath && this.unitAssets[assetPath]) {
+                    const img = this.unitAssets[assetPath];
+                    ctx.drawImage(img, px, py, cs, cs);
+                }
             }
 
             this._drawCellBorder(ctx, cell, px, py, cs);
@@ -179,9 +183,26 @@ export class Renderer {
             const sprites = await createTileLibrary('./assets/tiles.png', 16);
             this.tileLibrary = sprites;
             this.isReady = true;
-            console.log("Assets processed successfully.");
+            console.log("Assets processed successfully");
         } catch (e) {
             console.error("Asset loading failed", e);
+        }
+    }
+
+    async loadUnitAssets(level) {
+        if (!level || !level.units) return;
+        
+        for (const [unitType, config] of Object.entries(level.units)) {
+            if (config.asset && !this.unitAssets[config.asset]) {
+                try {
+                    const img = new Image();
+                    img.src = config.asset;
+                    await new Promise(resolve => img.onload = resolve);
+                    this.unitAssets[config.asset] = img;
+                } catch (e) {
+                    console.error(`Failed to load unit asset: ${config.asset}`, e);
+                }
+            }
         }
     }
 }
