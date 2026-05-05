@@ -43,6 +43,10 @@ export class Rider extends Unit {
 
     move(targetX, targetY, grid) {
         if (this.hasMoved) return false;
+        const dx = Math.sign(targetX - this.x);
+        const dy = Math.sign(targetY - this.y);
+        if (!this.isDirectionAllowed(dx, dy)) return false;
+
         const distance = Math.abs(this.x - targetX) + Math.abs(this.y - targetY);
         if (distance > this.moveRange) return false;
 

@@ -87,11 +87,9 @@
                 </div>
 
                 
-
-                
                 <div class="active-player-block">
                     <div class="panel-label">Active Player</div>
-                    <div class="active-player-card p1" id="active-player-card">
+                    <div class="active-player-card" id="active-player-card">
                         <div class="active-player-role active-player" id="active-player-role">Player 1 </div>
                         <div class="active-player-role" id="active-player-role">Player 2 </div>
                     </div>
@@ -102,12 +100,14 @@
                     <div class="soldier"></div>
                     <div class="rider"></div>
                 </div>
+                
                 <div class="panel-actions">
                     <button class="primary-btn" id="end-turn-btn">Fin de Tour </button>
                     <button class="secondary-btn" id="menu-btn">Menu</button>
                 </div>
             </div>
             <canvas id="game-canvas" class="game-canvas"></canvas>
+            <div id="turn-notice" class="turn-notice hidden">Not your turn</div>
             <div class="right-panel">
                 <div class="action-btns">
                     <div class="panel-label">Actions</div>
@@ -121,12 +121,29 @@
                         <span class="act-icon">⚑</span><span class="act-text">Capturer</span><span class="act-shortcut">C</span>
                     </button>
                 </div>
+
+                <div class="game-info">
+
+                <div class="placement-hint">
+                    Placement mode: click your unit then click another empty cell in your spawn row.
+                </div>
+                <button class="secondary-btn hidden" id="placement-done-btn">Start Battle</button>
+                </div>
             </div>
             
 
         </div>
 
-
+        <div id="placement-modal" class="container-bg">
+            <div class="modal-card">
+                <div>
+                <h2>Placement Phase</h2>
+                <img src="assets/about_icon.png" alt="" class="modal-icon">
+                </div>
+                <p>Arrange your units on the first row before the battle begins. Click one of your units, then click an empty spawn cell to move it.</p>
+                <button class="primary-btn" id="placement-modal-btn">Got it</button>
+            </div>
+        </div>
     </div>
     <script type="module" src="main.js"></script>
 </body>

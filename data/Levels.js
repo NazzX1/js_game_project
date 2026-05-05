@@ -1,4 +1,4 @@
-import { UnitType } from "./Enums.js";
+import { UnitType, GamePhase } from "./Enums.js";
 
 export const Levels = {
     1: {
@@ -6,12 +6,22 @@ export const Levels = {
         victoryCells: 33,
         spawnRows:    2,
         unitsPerPlayer: 5,
+        phaseTimers: {
+            [GamePhase.PLACEMENT]: 10,
+            [GamePhase.MOVEMENT]:  20,
+            [GamePhase.ACTION]:    20,
+        },
         units: {
             [UnitType.SOLDIER]: { 
                 move: 1, 
                 force: 2, 
                 label: 'S', 
                 name: 'Soldat',
+                health: 3,
+                directions: [
+                    [-1, 0], [1, 0], [0, -1], [0, 1],
+                    [-1, -1], [-1, 1], [1, -1], [1, 1]
+                ],
                 asset: './assets/units/soldier.png'  
             },
             [UnitType.RIDER]:   { 
@@ -19,6 +29,8 @@ export const Levels = {
                 force: 1, 
                 label: 'C', 
                 name: 'Cavalier',
+                health: 4,
+                directions: [[0, -1]],
                 asset: './assets/units/rider.png'
             },
             [UnitType.TANK]:    { 
@@ -26,6 +38,10 @@ export const Levels = {
                 force: 3, 
                 label: 'T', 
                 name: 'Tank',
+                health: 5,
+                directions: [
+                    [-1, 0], [1, 0], [0, -1], [0, 1]
+                ],
                 asset: './assets/units/tank.png' 
             },
         },

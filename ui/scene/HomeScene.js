@@ -9,7 +9,7 @@ export class HomeScene extends Scene {
     }
 
     onEnter() {
-        this.domElement.classList.remove('hidden');
+        this.domElement.classList.remove('hidden', 'fade-out');
 
         // Start button
         const btnStart = document.getElementById('start-btn');

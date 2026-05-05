@@ -1,38 +1,7 @@
 import { CellType, UnitType } from '../data/Enums.js';
 import { createTileLibrary } from '../utils/utils.js';
+import { COLORS } from '../data/Colors.js';
 
-const COLORS = {
-    bg:          '#0d0b08',
-    gridLine:    'rgba(201,168,76,0.18)',
-    gridLineDark:'rgba(201,168,76,0.08)',
-    empty:       '#111009',
-    emptyAlt:    '#130f08',
-    p1Zone:      'rgba(74,144,217,0.07)',
-    p2Zone:      'rgba(213,74,74,0.07)',
-    p1Own:       'rgba(74,144,217,0.22)',
-    p2Own:       'rgba(213,74,74,0.22)',
-    p1OwnBorder: 'rgba(74,144,217,0.5)',
-    p2OwnBorder: 'rgba(213,74,74,0.5)',
-    bonusAtk:    'rgba(74,173,122,0.14)',
-    bonusDef:    'rgba(74,144,217,0.14)',
-    trap:        'rgba(192,57,43,0.14)',
-    highlight:   'rgba(201,168,76,0.3)',
-    highlightBorder:'rgba(201,168,76,0.9)',
-    validMove:   'rgba(74,173,122,0.22)',
-    validMoveBorder:'rgba(74,173,122,0.8)',
-    validAttack: 'rgba(213,74,74,0.22)',
-    validAttackBorder:'rgba(213,74,74,0.8)',
-    selected:    'rgba(201,168,76,0.18)',
-    p1Unit:      '#7ab8f5',
-    p2Unit:      '#f57a7a',
-    p1UnitBg:    'rgba(74,144,217,0.35)',
-    p2UnitBg:    'rgba(213,74,74,0.35)',
-    gold:        '#c9a84c',
-    green:       '#5bad7a',
-    red:         '#c0392b',
-    text:        '#f0e6cc',
-    textDim:     '#9a8a68',
-};
 
 
 export class Renderer {
@@ -78,44 +47,85 @@ export class Renderer {
         ctx.fillStyle = COLORS.bg;
         ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
-        this._drawCells(ctx, gameManager);
+        this.#drawCells(ctx, gameManager);
     }
 
-    _drawCells(ctx, gm) {
-    if (!this.isReady) return;
-    const { grid, selectedUnit } = gm;
-    const cs = this.cellSize;
+    #drawCells(ctx, gm) {
+        if (!this.isReady) return;
+        const { grid, selectedUnit, validMoves = [] } = gm;
+        const cs = this.cellSize;
 
-    for (let r = 0; r < this.gridSize; r++) {
-        for (let c = 0; c < this.gridSize; c++) {
-            const cell = grid.matrix[r][c];
-            const px   = this.offsetX + c * cs;
-            const py   = this.offsetY + r * cs;
+        for (let r = 0; r < this.gridSize; r++) {
+            for (let c = 0; c < this.gridSize; c++) {
+                const cell = grid.matrix[r][c];
+                const px = this.offsetX + c * cs;
+                const py = this.offsetY + r * cs;
 
-            ctx.drawImage(this.tileLibrary[6], px, py, cs, cs);
-
-            const typeIndex = this._getSpriteIndex(cell.type);
-            if (typeIndex !== null && this.tileLibrary[typeIndex]) {
-                ctx.drawImage(this.tileLibrary[typeIndex], px, py, cs, cs);
+                this.#drawCellBackground(ctx, cell, px, py, cs);
+                this.#drawCellUnits(ctx, cell, gm, px, py, cs);
+                this.#drawCellBorder(ctx, cell, px, py, cs);
+                this.#drawOverlays(ctx, cell, r, c, px, py, cs, selectedUnit, validMoves);
             }
-
-            if (cell.units && cell.units.length > 0) {
-                const unit = cell.units[0];
-                const assetPath = gm.level.units[unit.type]?.asset;
-                if (assetPath && this.unitAssets[assetPath]) {
-                    const img = this.unitAssets[assetPath];
-                    ctx.drawImage(img, px, py, cs, cs);
-                }
-            }
-
-            this._drawCellBorder(ctx, cell, px, py, cs);
-
-            this._drawOverlays(ctx, cell, r, c, px, py, cs, selectedUnit);
         }
     }
-}
 
-    _drawCellBorder(ctx, cell, px, py, cs) {
+    #drawCellBackground(ctx, cell, px, py, cs) {
+        ctx.drawImage(this.tileLibrary[6], px, py, cs, cs);
+
+        const typeIndex = this.#getSpriteIndex(cell.type);
+        if (typeIndex !== null && this.tileLibrary[typeIndex]) {
+            ctx.drawImage(this.tileLibrary[typeIndex], px, py, cs, cs);
+        }
+    }
+
+    #drawCellUnits(ctx, cell, gm, px, py, cs) {
+        if (!cell.units || cell.units.length === 0) return;
+
+        this.#drawPrimaryUnit(ctx, cell.units[0], gm, px, py, cs);
+        this.#drawUnitHealthBar(ctx, cell.units[0], px, py, cs);
+
+        if (cell.units.length === 2) {
+            this._drawSecondaryUnit(ctx, cell.units[1], gm, px, py, cs);
+        }
+    }
+
+    #drawPrimaryUnit(ctx, unit, gm, px, py, cs) {
+        const assetPath = gm.level.units[unit.type]?.asset;
+        if (!assetPath || !this.unitAssets[assetPath]) return;
+
+        const img = this.unitAssets[assetPath];
+        ctx.drawImage(img, px, py, cs, cs);
+    }
+
+    #drawSecondaryUnit(ctx, unit, gm, px, py, cs) {
+        const assetPath = gm.level.units[unit.type]?.asset;
+        if (!assetPath || !this.unitAssets[assetPath]) return;
+
+        const img = this.unitAssets[assetPath];
+        const size = cs * 0.5;
+        const offset = cs - size - 4;
+        ctx.drawImage(img, px + offset, py + offset, size, size);
+    }
+
+    #drawUnitHealthBar(ctx, unit, px, py, cs) {
+        const barHeight = Math.max(4, Math.round(cs * 0.12));
+        const healthRatio = Math.max(0, Math.min(1, unit.health / unit.maxHealth));
+        const barWidth = cs - 8;
+        const barX = px + 4;
+        const barY = py + cs - barHeight - 4;
+
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.75)';
+        ctx.fillRect(barX, barY, barWidth, barHeight);
+
+        ctx.fillStyle = healthRatio > 0.5 ? '#5cb85c' : healthRatio > 0.25 ? '#f0ad4e' : '#d9534f';
+        ctx.fillRect(barX, barY, Math.round(barWidth * healthRatio), barHeight);
+
+        ctx.strokeStyle = '#000000cc';
+        ctx.lineWidth = 1;
+        ctx.strokeRect(barX, barY, barWidth, barHeight);
+    }
+
+    #drawCellBorder(ctx, cell, px, py, cs) {
         ctx.strokeStyle = COLORS.gridLine;
         ctx.lineWidth = 1;
 
@@ -129,9 +139,20 @@ export class Renderer {
 
         ctx.strokeRect(px, py, cs, cs);
     }
-    _drawOverlays(ctx, cell, r, c, px, py, cs, selectedUnit) {
+    #drawOverlays(ctx, cell, r, c, px, py, cs, selectedUnit, validMoves = []) {
         const isSelected = selectedUnit && selectedUnit.x === c && selectedUnit.y === r;
         const isHovered  = this.hoveredCell && this.hoveredCell.x === c && this.hoveredCell.y === r;
+        const isValidMove = validMoves.some(m => m.x === c && m.y === r);
+
+        if (isValidMove && !isSelected) {
+            ctx.fillStyle = COLORS.validMove;
+            ctx.fillRect(px, py, cs, cs);
+            const dotSize = cs * 0.15;
+            ctx.fillStyle = COLORS.validMoveBorder;
+            ctx.beginPath();
+            ctx.arc(px + cs / 2, py + cs / 2, dotSize, 0, Math.PI * 2);
+            ctx.fill();
+        }
 
         if (isHovered && !isSelected) {
             ctx.fillStyle = COLORS.highlight;
@@ -145,7 +166,7 @@ export class Renderer {
         }
     }
 
-    _getSpriteIndex(type) {
+    #getSpriteIndex(type) {
         const mapping = {
             [CellType.NEUTRAL]:   0,
             [CellType.BONUS_ATK]: 1,
