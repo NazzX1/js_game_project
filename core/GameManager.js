@@ -37,6 +37,15 @@ export class GameManager {
             [GamePhase.FINISHED]: 0,
         };
 
+        this.placementOrder = [
+            UnitType.SOLDIER,
+            UnitType.TANK,
+            UnitType.SOLDIER,
+            UnitType.RIDER,
+            UnitType.SOLDIER
+        ];
+        this.placementIndex = { 1: 0, 2: 0 };
+
         this.setPhase(GamePhase.PLACEMENT);
     }
 
@@ -72,6 +81,20 @@ export class GameManager {
         this.phaseTimeLeft = this.getPhaseTime(this.phase);
     }
 
+    createUnit(type, player, x, y) {
+        const stats = this.level.units[type] || {};
+        switch (type) {
+            case UnitType.SOLDIER:
+                return new Soldier(player, x, y, stats);
+            case UnitType.RIDER:
+                return new Rider(player, x, y, stats);
+            case UnitType.TANK:
+                return new Tank(player, x, y, stats);
+            default:
+                return new Unit(type, stats, player, x, y);
+        }
+    }
+
     initUnits() {
         const order = [UnitType.SOLDIER, UnitType.TANK, UnitType.SOLDIER, UnitType.RIDER, UnitType.SOLDIER];
 
@@ -80,12 +103,12 @@ export class GameManager {
             const p1Cell = this.grid.matrix[this.grid.size - 1][index];
             const p2Cell = this.grid.matrix[0][index];
 
-            const p1Unit = new Unit(type, this.level.units[type], 1, index, this.grid.size - 1);
+            const p1Unit = this.createUnit(type, 1, index, this.grid.size - 1);
             this.units[1].push(p1Unit);
             p1Cell.units.push(p1Unit);
             p1Cell.owner = 1;
 
-            const p2Unit = new Unit(type, this.level.units[type], 2, index, 0);
+            const p2Unit = this.createUnit(type, 2, index, 0);
             this.units[2].push(p2Unit);
             p2Cell.units.push(p2Unit);
             p2Cell.owner = 2;
@@ -136,10 +159,7 @@ export class GameManager {
 
         if (!isInZone) return false;
 
-        const stats = this.level.units[chosenType];
-        if (!stats) return false;
-
-        const unit = new Unit(chosenType, stats, this.placingPlayer, x, y);
+        const unit = this.createUnit(chosenType, this.placingPlayer, x, y);
         cell.owner = this.placingPlayer;
         cell.units.push(unit);
         this.units[this.placingPlayer].push(unit);

@@ -109,6 +109,13 @@
             <canvas id="game-canvas" class="game-canvas"></canvas>
             <div id="turn-notice" class="turn-notice hidden">Not your turn</div>
             <div class="right-panel">
+
+                <div class="phase-block">
+                    <div class="panel-label">Game Phase</div>
+                    <div id="phase-display" class="phase-display">Placement</div>
+                </div>
+
+                
                 <div class="action-btns">
                     <div class="panel-label">Actions</div>
                     <button class="act-btn act-attack" id="btn-attack" disabled>
@@ -122,12 +129,14 @@
                     </button>
                 </div>
 
+                
+
                 <div class="game-info">
 
                 <div class="placement-hint">
                     Placement mode: click your unit then click another empty cell in your spawn row.
                 </div>
-                <button class="secondary-btn hidden" id="placement-done-btn">Start Battle</button>
+                <button class="primary-btn hidden" id="placement-done-btn">Start Battle</button>
                 </div>
             </div>
             

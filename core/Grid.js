@@ -46,18 +46,26 @@ export class Grid {
 
         for (const tile of mid) {
             if (specials.length === 0) break;
-            if (!this._hasAdjacentSpecial(tile, placed)) {
-                this.matrix[tile.r][tile.c].type = specials.shift();
+            if (!this.#hasAdjacentSpecial(tile, placed)) {
+                this.getCell(tile.c, tile.r).type = specials.shift();
                 placed.push(tile);
             }
         }
     }
 
-    _hasAdjacentSpecial(tile, placed) {
-        return placed.some(p =>
-            Math.abs(p.r - tile.r) <= 1 && Math.abs(p.c - tile.c) <= 1
-        );
+    #hasAdjacentSpecial(tile, placed) {
+        for (const p of placed) {
+            const rowDistance = Math.abs(p.r - tile.r);
+            const colDistance = Math.abs(p.c - tile.c);
+
+            if (rowDistance <= 1 && colDistance <= 1) {
+                return true;
+            }
+        }
+        
+        return false;
     }
+    
 
     isInBounds(x, y) {
         return x >= 0 && x < this.size && y >= 0 && y < this.size;
@@ -71,7 +79,7 @@ export class Grid {
         let p1 = 0, p2 = 0;
         for (let r = 0; r < this.size; r++)
             for (let c = 0; c < this.size; c++) {
-                const owner = this.matrix[r][c].owner;
+                const owner = this.getCell(c, r).owner;
                 if (owner === 1) p1++;
                 else if (owner === 2) p2++;
             }

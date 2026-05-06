@@ -86,6 +86,26 @@
     gap: 8px;
 }
 
+.phase-block {
+    background: var(--surface);
+    padding: 20px;
+    border: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.phase-display {
+    background: var(--card);
+    padding: 14px;
+    border: 1px solid var(--border);
+    font-size: 16px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--gold);
+}
+
 .act-btn {
     background-image: url("../assets/Banner_Slots.png");
     background-size: cover;
