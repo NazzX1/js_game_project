@@ -25,47 +25,29 @@ export class Grid {
     }
 
     
-    generateSpecials(bonusAtk, bonusDef, traps) {
-        const mid = [];
-        for (let r = 2; r <= 5; r++)
-            for (let c = 0; c < this.size; c++)
-                mid.push({ r, c });
-
-        // Fisher-Yates shuffle
-        for (let i = mid.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [mid[i], mid[j]] = [mid[j], mid[i]];
-        }
-
-        const placed = [];
-        const specials = [
-            ...Array(bonusAtk).fill(CellType.BONUS_ATK),
-            ...Array(bonusDef).fill(CellType.BONUS_DEF),
-            ...Array(traps).fill(CellType.TRAP),
-        ];
-
-        for (const tile of mid) {
-            if (specials.length === 0) break;
-            if (!this.#hasAdjacentSpecial(tile, placed)) {
-                this.getCell(tile.c, tile.r).type = specials.shift();
-                placed.push(tile);
-            }
-        }
-    }
-
-    #hasAdjacentSpecial(tile, placed) {
-        for (const p of placed) {
-            const rowDistance = Math.abs(p.r - tile.r);
-            const colDistance = Math.abs(p.c - tile.c);
-
-            if (rowDistance <= 1 && colDistance <= 1) {
-                return true;
-            }
-        }
+    generateSpecials() {
+        const items = [CellType.BONUS_ATK, CellType.BONUS_DEF, CellType.TRAP];
         
-        return false;
+        items.sort(() => Math.random() - 0.5);
+
+        const startRow = 2;
+        const endRow = this.size - 3; 
+        const rowRange = endRow - startRow + 1; 
+
+        const sectionWidth = Math.floor(this.size / 3);
+
+        items.forEach((type, i) => {
+            const minCol = i * sectionWidth;
+            const maxCol = (i + 1) * sectionWidth - 1;
+
+            const r = Math.floor(Math.random() * rowRange) + startRow;
+            
+            const c = Math.floor(Math.random() * (maxCol - minCol + 1)) + minCol;
+
+            this.getCell(c, r).type = type;
+        });
     }
-    
+        
 
     isInBounds(x, y) {
         return x >= 0 && x < this.size && y >= 0 && y < this.size;

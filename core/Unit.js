@@ -26,7 +26,7 @@ export class Unit {
 
 
 
-    
+
 
     resetTurn() {
         this.hasMoved    = false;
@@ -99,19 +99,19 @@ export class Unit {
 
             if (dist < this.moveRange) {
                 for (const [dx, dy] of this.allowedDirections) {
-                    const nx = x + dx;
-                    const ny = y + dy;
-                    const key = `${nx},${ny}`;
+                    const newX = x + dx;
+                    const newY = y + dy;
+                    const key = `${newX},${newY}`;
 
-                    if (!visited.has(key) && grid.isInBounds(nx, ny)) {
+                    if (!visited.has(key) && grid.isInBounds(newX, newY)) {
                         visited.add(key);
-                        const cell = grid.matrix[ny][nx];
+                        const cell = grid.matrix[newY][newX];
                         const canEnter = !cell.units || cell.units.length === 0 ||
                             (cell.units.length === 1 && cell.units[0].player === this.player);
 
                         if (canEnter) {
-                            moves.push({ x: nx, y: ny });
-                            queue.push({ x: nx, y: ny, dist: dist + 1 });
+                            moves.push({ x: newX, y: newY });
+                            queue.push({ x: newX, y: newY, dist: dist + 1 });
                         }
                     }
                 }
