@@ -28,6 +28,7 @@ export class GameScene extends Scene {
         this.renderer = new Renderer('game-canvas', this.logic.config.gridSize);
         this.vsAI     = this.app.vsAI !== false;
         this.timerDisplay = document.getElementById('timer-display');
+        this.phaseDisplay = document.getElementById('phase-display');
         this.placementModal = document.getElementById('placement-modal');
 
         if (this.placementModal) {
@@ -47,6 +48,8 @@ export class GameScene extends Scene {
 
         this.turnNotice = document.getElementById('turn-notice');
         this.lastUpdateTime = performance.now();
+        this.lastPhase = this.logic.phase;
+        this.#updatePhaseDisplay();
         this.#updateTimerDisplay();
 
         this.renderer.canvas.onclick = this._clickHandler;
@@ -59,6 +62,7 @@ export class GameScene extends Scene {
                     this.logic.setPhase(GamePhase.MOVEMENT);
                     this.logic.selectedUnit = null;
                     doneButton.classList.add('hidden');
+                    this.#updatePhaseDisplay();
                     this.#updateTimerDisplay();
                 }
             };
@@ -104,6 +108,17 @@ export class GameScene extends Scene {
 
         this.logic.updatePhaseTimer(deltaMs);
         this.#updateTimerDisplay();
+    }
+
+    #updatePhaseDisplay() {
+        if (!this.phaseDisplay || !this.logic) return;
+        const phaseLabels = {
+            [GamePhase.PLACEMENT]: 'Placement',
+            [GamePhase.MOVEMENT]: 'Movement',
+            [GamePhase.ACTION]: 'Action',
+            [GamePhase.FINISHED]: 'Finished',
+        };
+        this.phaseDisplay.textContent = phaseLabels[this.logic.phase] || this.logic.phase;
     }
 
     #updateTimerDisplay() {
@@ -202,6 +217,10 @@ export class GameScene extends Scene {
     }
 
     update() {
+        if (this.logic && this.logic.phase !== this.lastPhase) {
+            this.lastPhase = this.logic.phase;
+            this.#updatePhaseDisplay();
+        }
         this.#updateTimer();
         if (this.logic?.phaseTimedOut && [GamePhase.MOVEMENT, GamePhase.ACTION].includes(this.logic.phase)) {
             this.logic.nextPlayerTurn();
