@@ -3,9 +3,6 @@ import { SceneType, GamePhase, UnitType, ActionType } from '../../data/Enums.js'
 import { GameManager } from '../../core/GameManager.js';
 import { Renderer }    from '../Renderer.js';
 
-
-
-
 export class GameScene extends Scene {
     
     constructor(app) {
@@ -21,7 +18,6 @@ export class GameScene extends Scene {
         this._clickHandler = (e) => this.#handleCanvasClick(e);
     }
 
-   
     onEnter() {
         const gameSceneElement = document.getElementById('game-scene');
         if (gameSceneElement) {
@@ -67,9 +63,6 @@ export class GameScene extends Scene {
                 }
             };
         }
-
-
-
 
         const endTurnButton = document.getElementById('end-turn-btn');
         if (endTurnButton) {
@@ -120,13 +113,13 @@ export class GameScene extends Scene {
         this.timerDisplay.textContent = `${seconds}s`;
     }
 
-
     #updatePlayerTurnDisplay() {
     const turnCard = document.querySelector('.active-player-card');
 
     if (turnCard) {
         Array.from(turnCard.children).forEach(child => {
             child.classList.toggle('active-player');
+            child.classList.toggle("hidden");
         });
     }
     }

@@ -2,13 +2,6 @@
 import { Unit } from "./Unit.js";
 import { UnitType } from "../data/Enums.js";
 
-
-
-
-
-
-
-
 export class Tank extends Unit {
     constructor(player, x, y) {
         const stats = {

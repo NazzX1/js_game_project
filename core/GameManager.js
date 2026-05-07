@@ -157,8 +157,6 @@ export class GameManager {
         return true;
     }
 
-    
-
     selectUnit(unit) {
         if (!unit || unit.player !== this.currentPlayer) return;
         this.selectedUnit = unit;

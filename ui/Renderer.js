@@ -1,8 +1,5 @@
 import { CellType, UnitType } from '../data/Enums.js';
-import { createTileLibrary } from '../utils/utils.js';
 import { COLORS } from '../data/Colors.js';
-
-
 
 export class Renderer {
     constructor(canvasId, gridSize) {
@@ -70,12 +67,7 @@ export class Renderer {
     }
 
     #drawCellBackground(ctx, cell, px, py, cs) {
-        ctx.drawImage(this.tileLibrary[6], px, py, cs, cs);
-
-        const typeIndex = this.#getSpriteIndex(cell.type);
-        if (typeIndex !== null && this.tileLibrary[typeIndex]) {
-            ctx.drawImage(this.tileLibrary[typeIndex], px, py, cs, cs);
-        }
+        ctx.drawImage(this.tileLibrary[0], px, py, cs, cs);
     }
 
     #drawCellUnits(ctx, cell, gm, px, py, cs) {
@@ -175,10 +167,7 @@ export class Renderer {
         };
         return mapping[type] ?? null;
     }
-
-
-   
-
+    
     getGridCoords(event) {
     const rect = this.canvas.getBoundingClientRect();
     
@@ -201,8 +190,10 @@ export class Renderer {
     async loadAssets() {
         if (this.isReady) return;
         try {
-            const sprites = await createTileLibrary('./assets/tiles.png', 16);
-            this.tileLibrary = sprites;
+            const img = new Image();
+            img.src = './assets/Grass_Tile.png';
+            this.tileLibrary[0] = img;
+            this.isReady = true;
             this.isReady = true;
             console.log("Assets processed successfully");
         } catch (e) {

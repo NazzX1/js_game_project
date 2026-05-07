@@ -1,7 +1,6 @@
 #home-scene { 
-    inset: 0 20%
+    inset: 0 18%
 }
-
 
 .title {
     position: relative; 
@@ -15,11 +14,9 @@
     
 }
 
-
-
 .main-title > h1 {
     font-family: var(--font-primary); 
-    font-size: clamp(5rem,5vw,3.2rem);
+    font-size: clamp(2.5rem,4vw,3.2rem);
     font-weight: 900; 
     line-height: 1.1; 
     color: var(--text);
@@ -31,7 +28,7 @@
     display: flex; 
     align-items: center; 
     gap: 1rem;
-    justify-content: end;
+    justify-content: center;
 }
 
 .main-title > div > p {
@@ -44,7 +41,6 @@
     transform: scaleX(-1);
 }
 
-
 .desc{
     display: flex; 
     gap: 0.5rem;
@@ -52,10 +48,6 @@
     align-items: center;
     color: var(--gold);
 }
-
-
-
-
 
 .mode{
     display: flex; 
@@ -80,7 +72,6 @@
     transition: all 0.18s;
 }
 
-
 .mode-btn.selected { 
     background: var(--card2); 
     color: var(--gold); 
@@ -99,8 +90,6 @@
     margin-bottom: 1.5rem;
      
 }
-
-
 
 .settings-panel {
     background-image: url("../assets/Banner_Slots.png");

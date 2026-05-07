@@ -1,8 +1,6 @@
 import { Unit } from "./Unit.js";
 import { UnitType } from "../data/Enums.js";
 
-
-
 export class Soldier extends Unit {
     constructor(player, x, y) {
         const stats = {
@@ -13,9 +11,6 @@ export class Soldier extends Unit {
         };
         super(UnitType.SOLDIER, stats, player, x, y);
     }
-
-
-
 
     render(ctx, cellSize) {
         ctx.fillStyle = this.player === 1 ? 'blue' : 'red';

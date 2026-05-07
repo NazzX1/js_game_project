@@ -27,9 +27,6 @@
     opacity: 1;
 }
 
-
-
-
 #game-canvas {
     display: block;
     max-width: min(calc(100vw - 50px), 60vw);
@@ -41,8 +38,6 @@
     outline-offset: 2px;
     
 }
-
-
 
 .right-panel {
     backdrop-filter: blur(20px);
@@ -56,7 +51,6 @@
     padding: 1%;
     overflow-y: auto;
 }
-
 
 .left-panel {
     backdrop-filter: blur(20px);
@@ -110,10 +104,7 @@
     cursor: not-allowed;
 }
 
-
-
 .panel-actions {
-    
     justify-content: flex-end;
     padding: 10px 14px;
     border-top: 1px solid var(--border);
@@ -133,8 +124,6 @@
     border-bottom: 1px solid var(--border);
     order: -3;
 }
-
-
 
 .timer-block {
     padding: 8px 14px;
@@ -156,8 +145,8 @@
 
 .panel-label {
     background: var(--blue-dark);
-    padding: 10px;
-    font-size: 14px;
+    padding: 10px 8px;
+    font-size: .9rem;
     color: var(--gold);
 }
 
@@ -166,13 +155,14 @@
     align-items: center;
     justify-content: space-between;
     gap: 10px;
-    padding: 20px 5px;
+    padding: 8px 5px;
 }
 
 #active-player-role{
     border: 1px solid var(--border);
-    padding: 30px 14px;
+    padding: 11px 10px;
     border-radius: 5px;
+    font-size: .8rem;
 }
 
 .active-player{
@@ -184,7 +174,6 @@
     font-size: 13px;
 }
 
-
 .units {
     background: var(--surface);
     display: flex;
@@ -192,13 +181,17 @@
     gap: 10px;
     border: 1px solid var(--border);
     padding: 15px;
+    overflow-y: scroll;
+    height: 280px;
 }
+
 .units > h1{
     background: var(--blue-dark);
     padding: 10px;
     font-size: 14px;
     color: var(--gold)
 }
+
 .units > div {
     display: flex;
     flex-wrap: wrap;
@@ -221,6 +214,7 @@
 .units > .tank > div{
     background-color: var(--green-light);
 }
+
 .unit-card {
     border: 1px solid var(--border);
     padding: 6px 10px;
@@ -264,7 +258,7 @@
 }
 
 #timer-display {
-    font-size: 30px;
+    font-size: 25px;
     font-weight: bold;
     color: var(--red-light);
 }

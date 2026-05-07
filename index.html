@@ -11,11 +11,11 @@
     <link rel="stylesheet" href="./css/common.css">
     <link rel="stylesheet" href="./css/animations.css">
     <link rel="stylesheet" href="./css/modals.css">
+    <link rel="icon" href="./assets/Avatars_21.png">
     
 </head>
 <body>
     <div class="game-container">
-
 
         <div id="home-scene" class="scene">
             <div class="title">
@@ -35,7 +35,6 @@
             </div>
             </div>
 
-
             <div class="mode">
                 <button class="mode-btn selected" id="single-player-btn">PvP</button>
                 <button class="mode-btn" id="multi-player-btn">vs AI</button>
@@ -44,7 +43,6 @@
                 <button class="primary-btn" id="start-btn">Start Game</button>
                 <button class="secondary-btn" id="settings-btn">Settings</button>
             </div>
-
 
             <div id="settings-container" class="container-bg">
             <div class="settings-panel">
@@ -70,12 +68,9 @@
                     <button class="primary-btn" id="settings-back-btn">Back</button>
                 </div>
                 
-                
             </div>
         </div>
         </div>
-
-
 
         <div id="game-scene" class="scene hidden" >
             <div class="left-panel">
@@ -86,16 +81,15 @@
                 </div>
                 </div>
 
-                
                 <div class="active-player-block">
                     <div class="panel-label">Active Player</div>
                     <div class="active-player-card" id="active-player-card">
                         <div class="active-player-role active-player" id="active-player-role">Player 1 </div>
-                        <div class="active-player-role" id="active-player-role">Player 2 </div>
+                        <div class="active-player-role hidden" id="active-player-role">Player 2 </div>
                     </div>
                 </div>
                 <div class="units">
-                    <h1>Available units :</h1>
+                    <h1>Available units</h1>
                     <div class="tank"></div>
                     <div class="soldier"></div>
                     <div class="rider"></div>
@@ -130,7 +124,6 @@
                 <button class="secondary-btn hidden" id="placement-done-btn">Start Battle</button>
                 </div>
             </div>
-            
 
         </div>
 

@@ -24,7 +24,6 @@ export class Grid {
         return grid;
     }
 
-    
     generateSpecials(bonusAtk, bonusDef, traps) {
         const mid = [];
         for (let r = 2; r <= 5; r++)
