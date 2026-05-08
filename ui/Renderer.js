@@ -1,4 +1,4 @@
-import { CellType, UnitType } from '../data/Enums.js';
+import { CellType, UnitType, GamePhase  } from '../data/Enums.js';
 import { COLORS } from '../data/Colors.js';
 
 export class Renderer {
@@ -25,15 +25,15 @@ export class Renderer {
     }
 
     _resize() {
-    const container = this.canvas.parentElement;
-    const size = Math.min(container.clientWidth, container.clientHeight, 620);
-    this.canvas.width = size;
-    this.canvas.height = size;
+        const container = this.canvas.parentElement;
+        const size = Math.min(container.clientWidth, container.clientHeight, 620);
+        this.canvas.width = size;
+        this.canvas.height = size;
 
-    this.offsetX = 20; 
-    this.offsetY = 20;
+        this.offsetX = 20; 
+        this.offsetY = 20;
 
-    this.cellSize = (size - (this.offsetX * 2)) / this.gridSize;
+        this.cellSize = (size - (this.offsetX * 2)) / this.gridSize;
     }
 
     draw(gameManager) {
@@ -61,7 +61,7 @@ export class Renderer {
                 this.#drawCellBackground(ctx, cell, px, py, cs);
                 this.#drawCellUnits(ctx, cell, gm, px, py, cs);
                 this.#drawCellBorder(ctx, cell, px, py, cs);
-                this.#drawOverlays(ctx, cell, r, c, px, py, cs, selectedUnit, validMoves);
+                this.#drawOverlays(ctx, cell, r, c, px, py, cs, gm, selectedUnit, validMoves);
             }
         }
     }
@@ -77,7 +77,7 @@ export class Renderer {
         this.#drawUnitHealthBar(ctx, cell.units[0], px, py, cs);
 
         if (cell.units.length === 2) {
-            this._drawSecondaryUnit(ctx, cell.units[1], gm, px, py, cs);
+            this.#drawSecondaryUnit(ctx, cell.units[1], gm, px, py, cs);
         }
     }
 
@@ -131,19 +131,30 @@ export class Renderer {
 
         ctx.strokeRect(px, py, cs, cs);
     }
-    #drawOverlays(ctx, cell, r, c, px, py, cs, selectedUnit, validMoves = []) {
+
+    #drawOverlays(ctx, cell, r, c, px, py, cs, gm, selectedUnit, validMoves = []) {
         const isSelected = selectedUnit && selectedUnit.x === c && selectedUnit.y === r;
         const isHovered  = this.hoveredCell && this.hoveredCell.x === c && this.hoveredCell.y === r;
         const isValidMove = validMoves.some(m => m.x === c && m.y === r);
 
+        const shouldShowSpawnZone =
+            gm.phase === GamePhase.PLACEMENT &&
+            (gm.selectedPlacementUnit || gm.selectedUnit);
+
+        const isSpawnCell = gm.isInSpawnZone(gm.currentPlayer, r);
+
+        if (shouldShowSpawnZone && isSpawnCell) {
+            ctx.fillStyle = COLORS.highlightCell;
+            ctx.fillRect(px, py, cs, cs);
+
+            ctx.strokeStyle = COLORS.highlightBorder;
+            ctx.lineWidth = 2;
+            ctx.strokeRect(px + 2, py + 2, cs - 4, cs - 4);
+        }
+
         if (isValidMove && !isSelected) {
             ctx.fillStyle = COLORS.validMove;
             ctx.fillRect(px, py, cs, cs);
-            const dotSize = cs * 0.15;
-            ctx.fillStyle = COLORS.validMoveBorder;
-            ctx.beginPath();
-            ctx.arc(px + cs / 2, py + cs / 2, dotSize, 0, Math.PI * 2);
-            ctx.fill();
         }
 
         if (isHovered && !isSelected) {
@@ -152,7 +163,7 @@ export class Renderer {
         }
 
         if (isSelected) {
-            ctx.strokeStyle = COLORS.highlightBorder;
+            ctx.strokeStyle = COLORS.red;
             ctx.lineWidth = 2.5;
             ctx.strokeRect(px + 1, py + 1, cs - 2, cs - 2);
         }
@@ -193,7 +204,6 @@ export class Renderer {
             const img = new Image();
             img.src = './assets/Grass_Tile.png';
             this.tileLibrary[0] = img;
-            this.isReady = true;
             this.isReady = true;
             console.log("Assets processed successfully");
         } catch (e) {

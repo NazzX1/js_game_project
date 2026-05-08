@@ -21,13 +21,6 @@ export class Unit {
         this.alive       = true;
     }
 
-
-
-
-
-
-
-
     resetTurn() {
         this.hasMoved    = false;
         this.hasActed    = false;

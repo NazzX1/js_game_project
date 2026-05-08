@@ -75,10 +75,10 @@
         <div id="game-scene" class="scene hidden" >
             <div class="left-panel">
                 <div class="territory-block">
-                <div class="panel-label">Territory Control</div>
-                <div class="timer-block">
-                    <div id="timer-display">16s</div>
-                </div>
+                    <div class="panel-label">Time left</div>
+                    <div class="timer-block">
+                        <div id="timer-display">16s</div>
+                    </div>
                 </div>
 
                 <div class="active-player-block">
@@ -89,10 +89,13 @@
                     </div>
                 </div>
                 <div class="units">
-                    <h1>Available units</h1>
-                    <div class="tank"></div>
-                    <div class="soldier"></div>
-                    <div class="rider"></div>
+                    <h1>Units</h1>
+                    <div class="units-cards">
+                        <div class="tank"></div>
+                        <div class="soldier"></div>
+                        <div class="rider"></div>
+                    </div>
+                    <p>Units left : <span id="units-left">5</span></p>
                 </div>
                 
                 <div class="panel-actions">
@@ -109,7 +112,7 @@
                     <div id="phase-display" class="phase-display">Placement</div>
                 </div>
 
-                
+                <!--
                 <div class="action-btns">
                     <div class="panel-label">Actions</div>
                     <button class="act-btn act-attack" id="btn-attack" disabled>
@@ -122,9 +125,8 @@
                         <span class="act-icon">⚑</span><span class="act-text">Capturer</span><span class="act-shortcut">C</span>
                     </button>
                 </div>
-
+                -->
                 
-
                 <div class="game-info">
 
                 <div class="placement-hint">

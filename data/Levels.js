@@ -7,8 +7,8 @@ export const Levels = {
         spawnRows:    2,
         unitsPerPlayer: 5,
         phaseTimers: {
-            [GamePhase.PLACEMENT]: 10,
-            [GamePhase.MOVEMENT]:  20,
+            [GamePhase.PLACEMENT]: 20,
+            [GamePhase.MOVEMENT]:  30,
             [GamePhase.ACTION]:    20,
         },
         units: {

@@ -46,7 +46,7 @@
     border: 5px solid var(--border);
     display: flex;
     flex-direction: column;
-    gap: 5rem;
+    gap: 1rem;
     z-index: 1;
     padding: 1%;
     overflow-y: auto;
@@ -59,7 +59,7 @@
     border: 1px solid var(--border);
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
+    justify-content: start;
     gap: 1rem;
     z-index: 1;
     padding: 1%;
@@ -160,7 +160,6 @@
     gap: 10px;
     padding: 20px 14px;
     border: 1px solid var(--border);
-  
 }
 
 .panel-label {
@@ -173,7 +172,7 @@
 #active-player-card{
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: center;
     gap: 10px;
     padding: 8px 5px;
 }
@@ -201,18 +200,21 @@
     gap: 10px;
     border: 1px solid var(--border);
     padding: 15px;
-    overflow-y: scroll;
-    height: 280px;
 }
 
-.units > h1{
+.units > h1 {
     background: var(--blue-dark);
     padding: 10px;
     font-size: 14px;
     color: var(--gold)
 }
 
-.units > div {
+.units > p {
+    font-size: 12px;
+    color: var(--text);
+}
+
+.units-cards {
     display: flex;
     flex-wrap: wrap;
     gap: 4px;
@@ -223,32 +225,32 @@
     scale: 1.5;
 }
 
-.units > .soldier > div{
+.units-cards > .soldier > div{
     background-color: var(--blue-light);
 }
 
-.units > .rider > div{ 
+.units-cards > .rider > div{ 
     background-color: var(--red-light);
 }
 
-.units > .tank > div{
+.units-cards > .tank > div{
     background-color: var(--green-light);
 }
 
 .unit-card {
     border: 1px solid var(--border);
-    padding: 6px 10px;
+    padding: 6px 6px;
     display: flex;
     align-items: center;
     gap: 4px;
     font-size: 7px;
     border-radius: 5px;
-
+    cursor: pointer;
 }
 
 .unit-icon{
-    width: 30px;
-    height: 30px;
+    width: 45px;
+    height: 45px;
 }
 
 .unit-info{
@@ -271,7 +273,7 @@
     margin: 14px 0;
     padding: 10px 12px;
     border-radius: 12px;
-    background: rgba(201, 168, 76, 0.12);
+    background: var(--surface);
     color: var(--text);
     font-size: 13px;
     line-height: 1.4;

@@ -15,6 +15,7 @@ export const COLORS = {
     trap:        'rgba(192,57,43,0.14)',
     highlight:   'rgba(201,168,76,0.3)',
     highlightBorder:'rgba(201,168,76,0.9)',
+    highlightCell: 'rgba(255, 215, 0, 0.18)',
     validMove:   'rgba(74,173,122,0.22)',
     validMoveBorder:'rgba(74,173,122,0.8)',
     validAttack: 'rgba(213,74,74,0.22)',

@@ -27,7 +27,7 @@ export class GameManager {
         this.selectedUnit = null;
         this.validMoves = [];
         this.validAttacks = [];
-        
+        this.selectedPlacementUnit = null;
         this.ai = new AIPlayer(this);
 
         this.phaseTimers = this.level.phaseTimers || {
@@ -95,24 +95,23 @@ export class GameManager {
         }
     }
 
-    initUnits() {
-        const order = [UnitType.SOLDIER, UnitType.TANK, UnitType.SOLDIER, UnitType.RIDER, UnitType.SOLDIER];
+    removeUnit(unit) {
+        //if (this.phase !== GamePhase.PLACEMENT) return false;
+        if (!unit || unit.player !== this.currentPlayer) return false;
 
-        for (let index = 0; index < this.unitsLeft[1]; index++) {
-            const type = order[index] || UnitType.SOLDIER;
-            const p1Cell = this.grid.matrix[this.grid.size - 1][index];
-            const p2Cell = this.grid.matrix[0][index];
+        const cell = this.grid.matrix[unit.y][unit.x];
+        cell.units = cell.units.filter(u => u !== unit);
+        cell.owner = cell.units.length ? cell.units[0].player : null;
 
-            const p1Unit = this.createUnit(type, 1, index, this.grid.size - 1);
-            this.units[1].push(p1Unit);
-            p1Cell.units.push(p1Unit);
-            p1Cell.owner = 1;
+        this.units[1] = this.units[1].filter(u => u !== unit);
 
-            const p2Unit = this.createUnit(type, 2, index, 0);
-            this.units[2].push(p2Unit);
-            p2Cell.units.push(p2Unit);
-            p2Cell.owner = 2;
+        if (this.selectedPlacementUnit === unit) {
+            this.selectedPlacementUnit = null;
         }
+
+        this.unitsLeft[this.currentPlayer] += 1;
+
+        return true;
     }
 
     isInSpawnZone(player, y) {
@@ -122,13 +121,25 @@ export class GameManager {
             : y < spawnRows;
     }
 
+    placeUnit(coords) {
+        /* Places selected unit from the panel in the desired cell of the spawn zone during placement phase.*/
+        if (!this.unitsLeft[this.currentPlayer]) return false;
+        const cell = this.grid.matrix[coords.y][coords.x];
+        console.log(cell);
+        const unit = this.createUnit(this.selectedPlacementUnit, this.currentPlayer, coords.x, coords.y);
+        cell.units.push(unit);
+        this.selectedPlacementUnit = null;
+        this.unitsLeft[this.currentPlayer] -= 1;
+        return true;
+    }
+
     movePlacementUnit(unit, x, y) {
+        /* Moves selected unit during placement phase.*/
         if (!unit || this.phase !== GamePhase.PLACEMENT) return false;
-        if (unit.player !== 1) return false;
+        if (unit.player !== this.currentPlayer) return false;
         if (!this.grid.isInBounds(x, y)) return false;
 
         const target = this.grid.matrix[y][x];
-        if (target.units.length >= 2) return false;
         if (target.units.length > 0 && target.units[0].player !== unit.player) return false;
         if (!this.isInSpawnZone(unit.player, y)) return false;
 
@@ -140,39 +151,6 @@ export class GameManager {
         target.owner = unit.player;
         unit.x = x;
         unit.y = y;
-
-        return true;
-    }
-
-    placeUnit(unitType, x, y) {
-        const chosenType = unitType || this.placementOrder[this.placementIndex[this.placingPlayer]];
-        if (!chosenType) return false;
-
-        const cell = this.grid.matrix[y][x];
-        if (cell.units && cell.units.length >= 2) return false;
-        if (cell.units && cell.units.length === 1 && cell.units[0].player !== this.placingPlayer) return false;
-
-        const spawnRows = this.level.spawnRows;
-        const isInZone = (this.placingPlayer === 1)
-            ? (y >= this.grid.size - spawnRows)
-            : (y < spawnRows);
-
-        if (!isInZone) return false;
-
-        const unit = this.createUnit(chosenType, this.placingPlayer, x, y);
-        cell.owner = this.placingPlayer;
-        cell.units.push(unit);
-        this.units[this.placingPlayer].push(unit);
-        this.placementIndex[this.placingPlayer]++;
-
-        this.unitsLeft[this.placingPlayer]--;
-
-        if (this.unitsLeft[1] === 0 && this.unitsLeft[2] === 0) {
-            this.setPhase(GamePhase.MOVEMENT);
-            this.currentPlayer = 1;
-        } else if (this.unitsLeft[this.placingPlayer] === 0) {
-            this.placingPlayer = this.placingPlayer === 1 ? 2 : 1;
-        }
 
         return true;
     }
@@ -207,39 +185,25 @@ export class GameManager {
         return [];
     }
 
-    renderUnitsInfo() {
-        console.log(this.units);
-        const player1Units = this.units["1"];
-
-        const containers = {
-            SOLDIER: document.querySelector('.soldier'),
-            RIDER: document.querySelector('.rider'),
-            TANK: document.querySelector('.tank')
-        };
-
-        Object.values(containers).forEach(container => {
-            if (container) container.innerHTML = '';
-        });
-
-        player1Units.forEach(unit => {
+    renderPlacementUnits() {
+        const unitTypes = [
+            { type: UnitType.SOLDIER, cssClass: '.soldier' },
+            { type: UnitType.RIDER,   cssClass: '.rider'   },
+            { type: UnitType.TANK,    cssClass: '.tank'    },
+        ];
+ 
+        unitTypes.forEach(({ type, cssClass }) => {
+            const container = document.querySelector(cssClass);
+            if (!container) {
+                console.warn(`renderPlacementUnits: container not found for ${cssClass}`);
+                return;
+            }
+            container.innerHTML = '';
             const unitDiv = document.createElement('div');
             unitDiv.className = 'unit-card';
-            unitDiv.innerHTML = `
-            <img src="assets/units/${unit.type.toLowerCase()}.png" class="unit-icon">
-            <div class="unit-info">
-            <span>${unit.name}</span>
-            <div class="unit-stats">
-                <span>Health: ${unit.health}</span>
-                <span>Move: ${unit.moveRange}</span>
-                <span>Force: ${unit.force}</span>
-            </div>
-            </div>
-        `;
-
-            const target = containers[unit.type];
-            if (target) {
-                target.appendChild(unitDiv);
-            }
+            unitDiv.dataset.unitType = type;
+            unitDiv.innerHTML = `<img src="assets/units/${type.toLowerCase()}.png" class="unit-icon">`;
+            container.appendChild(unitDiv);
         });
     }
 }

@@ -15,7 +15,8 @@ export class GameScene extends Scene {
         this.turnNotice = null;
         this.turnNoticeTimeout = null;
         this.lastUpdateTime = 0;
-        this._clickHandler = (e) => this.#handleCanvasClick(e);
+        this._leftClickHandler = (e) => this.#handleCanvasClick(e);
+        this._rightClickHandler = (e) => this.#handleCanvasRightClick(e);
     }
 
     onEnter() {
@@ -43,8 +44,8 @@ export class GameScene extends Scene {
         }
 
         this.renderer.loadUnitAssets(this.logic.level);
-        this.logic.initUnits();
-        this.logic.renderUnitsInfo();
+        this.logic.renderPlacementUnits();
+        this.#selectPlacementUnitFromPanel();
 
         this.turnNotice = document.getElementById('turn-notice');
         this.lastUpdateTime = performance.now();
@@ -52,7 +53,11 @@ export class GameScene extends Scene {
         this.#updatePhaseDisplay();
         this.#updateTimerDisplay();
 
-        this.renderer.canvas.onclick = this._clickHandler;
+         // left click
+        this.renderer.canvas.addEventListener('click', this._leftClickHandler);
+
+        // right click
+        this.renderer.canvas.addEventListener('contextmenu', this._rightClickHandler);
 
         const doneButton = document.getElementById('placement-done-btn');
         if (doneButton) {
@@ -61,6 +66,7 @@ export class GameScene extends Scene {
                 if (this.logic.phase === GamePhase.PLACEMENT) {
                     this.logic.setPhase(GamePhase.MOVEMENT);
                     this.logic.selectedUnit = null;
+                    this.logic.ai.placeUnits();
                     doneButton.classList.add('hidden');
                     this.#updatePhaseDisplay();
                     this.#updateTimerDisplay();
@@ -129,14 +135,27 @@ export class GameScene extends Scene {
     }
 
     #updatePlayerTurnDisplay() {
-    const turnCard = document.querySelector('.active-player-card');
+        const turnCard = document.querySelector('.active-player-card');
 
-    if (turnCard) {
-        Array.from(turnCard.children).forEach(child => {
-            child.classList.toggle('active-player');
-            child.classList.toggle("hidden");
-        });
+        if (turnCard) {
+            Array.from(turnCard.children).forEach(child => {
+                child.classList.toggle('active-player');
+                child.classList.toggle("hidden");
+            });
+        }
     }
+
+    #selectPlacementUnitFromPanel() {
+        const cards = document.querySelectorAll('.unit-card');
+        cards.forEach(card => {
+            card.addEventListener('click', () => {
+                const type = card.dataset.unitType;
+                if (!type) return;
+                document.querySelectorAll('.unit-card').forEach(c => c.classList.remove('selected'));
+                card.classList.add('selected');
+                this.logic.selectedPlacementUnit = type;
+            });
+        });
     }
 
     #handleCanvasClick(event) {
@@ -146,53 +165,57 @@ export class GameScene extends Scene {
         if (!coords) return;
 
         const cell = this.logic.grid.matrix[coords.y][coords.x];
-        const unit = cell.units[0];
+        const clickedUnit = cell.units[0];
 
         if (this.logic.phase === GamePhase.PLACEMENT) {
-            if (!this.logic.isInSpawnZone(1, coords.y)) return;
 
-            if (!this.logic.selectedUnit) {
-                if (!unit || unit.player !== 1) return;
-                this.logic.selectedUnit = unit;
-                return;
-            }
+            if (this.logic.selectedPlacementUnit) {
+                const placed = this.logic.placeUnit(coords);
 
-            if (unit && unit.player === 1) {
-                this.logic.selectedUnit = unit;
-                return;
-            }
-
-            if (this.logic.movePlacementUnit(this.logic.selectedUnit, coords.x, coords.y)) {
-                this.logic.selectedUnit = null;
-            }
-        } else if (this.logic.phase === GamePhase.MOVEMENT) {
-            if (this.vsAI && this.logic.currentPlayer === 2) {
-                this.#showTurnNotice('Not your turn');
-                return;
-            }
-
-            if (unit && unit.player === this.logic.currentPlayer) {
-                if (this.logic.selectedUnit && this.logic.selectedUnit.x === unit.x && this.logic.selectedUnit.y === unit.y) {
-                    this.logic.selectedUnit = null;
-                    this.logic.validMoves = [];
-                } else {
-                    this.logic.selectedUnit = unit;
-                    this.logic.validMoves = this.logic.getValidMoves(unit);
+                if (placed) {
+                    const unitsLeftParagraph = document.getElementById("units-left");
+                    unitsLeftParagraph.innerText = this.logic.unitsLeft[this.logic.placingPlayer];
+                    this.logic.selectedPlacementUnit = null;
                 }
+
                 return;
             }
 
-            if (unit && unit.player !== this.logic.currentPlayer) {
-                this.#showTurnNotice('Not your turn');
+            if (clickedUnit && clickedUnit.player === this.logic.currentPlayer) {
+                this.logic.selectedUnit = clickedUnit;
+                //console.log("selected unit:", clickedUnit);
                 return;
             }
 
             if (this.logic.selectedUnit) {
-                const isValidMove = this.logic.validMoves.some(m => m.x === coords.x && m.y === coords.y);
-                if (isValidMove && !unit) {
-                    this.#moveUnit(this.logic.selectedUnit, coords.x, coords.y);
+                const moved = this.logic.movePlacementUnit(
+                    this.logic.selectedUnit,
+                    coords.x,
+                    coords.y
+                );
+
+                if (moved) {
+                    this.logic.selectedUnit = null;
                 }
+                return;
             }
+        }
+    }
+
+    #handleCanvasRightClick(event) {
+        event.preventDefault();
+        if (!this.logic) return;
+
+        const coords = this.renderer.getGridCoords(event);
+        if (!coords) return;
+
+        const cell = this.logic.grid.matrix[coords.y][coords.x];
+
+        if (this.logic.phase === GamePhase.PLACEMENT) {
+            if (!this.logic.isInSpawnZone(this.logic.currentPlayer, coords.y)) return;
+            this.logic.removeUnit(cell.units[cell.units.length - 1]);
+            const unitsLeftParagagraph = document.getElementById("units-left");
+            unitsLeftParagagraph.innerText = this.logic.unitsLeft[this.logic.currentPlayer];
         }
     }
 
