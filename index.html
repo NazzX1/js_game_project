@@ -36,8 +36,8 @@
             </div>
 
             <div class="mode">
-                <button class="mode-btn selected" id="single-player-btn">PvP</button>
-                <button class="mode-btn" id="multi-player-btn">vs AI</button>
+                <button class="mode-btn" data-mode="pvp" id="multi-player-btn">PvP</button>
+                <button class="mode-btn selected" data-mode="ai" id="single-player-btn">vs AI</button>
             </div>
             <div class="menu">
                 <button class="primary-btn" id="start-btn">Start Game</button>
@@ -48,7 +48,7 @@
             <div class="settings-panel">
                 <h1 class="settings-title">Settings</h1>
                 <div class="setting-1 seg-row">
-                    <span class="setting-label">IA difficulty</span>
+                    <span class="setting-label">AI difficulty</span>
                     <div class="setting-control">
                         <button class="seg-btn" data-key="diff">Easy</button>
                         <button class="seg-btn active" data-key="diff">Medium</button>
@@ -84,8 +84,7 @@
                 <div class="active-player-block">
                     <div class="panel-label">Active Player</div>
                     <div class="active-player-card" id="active-player-card">
-                        <div class="active-player-role active-player" id="active-player-role">Player 1 </div>
-                        <div class="active-player-role hidden" id="active-player-role">Player 2 </div>
+                        <div class="active-player-role active-player" id="active-player-role">Player <span id="active-player-number">1</span></div>
                     </div>
                 </div>
                 <div class="units">
@@ -128,11 +127,18 @@
                 -->
                 
                 <div class="game-info">
-
-                <div class="placement-hint">
-                    Placement mode: click your unit then click another empty cell in your spawn row.
+                    <div class="placement-hint">
+                        Placement mode: click your unit then click another empty cell in your spawn row.
+                    </div>
+                    <button class="primary-btn hidden" id="placement-done-btn">Start Battle</button>
                 </div>
-                <button class="primary-btn hidden" id="placement-done-btn">Start Battle</button>
+
+                <div id="roll-dice" class="game-info hidden">
+                    <div class="panel-label">Roll Dice</div>
+                    <div id="dice-turn-text">Player 1 roll</div>
+                    <button class="primary-btn" id="roll-dice-btn">Roll</button>
+                    <div id="dice-value"></div>
+                    <div id="starting-player"></div>
                 </div>
             </div>
 
@@ -148,6 +154,7 @@
                 <button class="primary-btn" id="placement-modal-btn">Got it</button>
             </div>
         </div>
+
     </div>
     <script type="module" src="main.js"></script>
 </body>

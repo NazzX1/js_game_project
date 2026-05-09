@@ -6,6 +6,7 @@ export const Levels = {
         victoryCells: 33,
         spawnRows:    2,
         unitsPerPlayer: 5,
+        maxUnitsPerCell: 3,
         phaseTimers: {
             [GamePhase.PLACEMENT]: 20,
             [GamePhase.MOVEMENT]:  30,

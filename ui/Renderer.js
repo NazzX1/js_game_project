@@ -67,7 +67,15 @@ export class Renderer {
     }
 
     #drawCellBackground(ctx, cell, px, py, cs) {
-        ctx.drawImage(this.tileLibrary[0], px, py, cs, cs);
+        let tileIndex = 0;
+
+        if (cell.owner === 1) {
+            tileIndex = 1;
+        } else if (cell.owner === 2) {
+            tileIndex = 2;
+        }
+
+        ctx.drawImage(this.tileLibrary[tileIndex], px, py, cs, cs);
     }
 
     #drawCellUnits(ctx, cell, gm, px, py, cs) {
@@ -76,9 +84,27 @@ export class Renderer {
         this.#drawPrimaryUnit(ctx, cell.units[0], gm, px, py, cs);
         this.#drawUnitHealthBar(ctx, cell.units[0], px, py, cs);
 
-        if (cell.units.length === 2) {
-            this.#drawSecondaryUnit(ctx, cell.units[1], gm, px, py, cs);
-        }
+        this.#drawUnitCounter(ctx, cell, px, py, cs);
+    }
+
+    #drawUnitCounter(ctx, cell, px, py, cs) {
+        const count = cell.units.length;
+        if (count <= 1) return;
+
+        const radius = cs * 0.18;
+        const x = px + cs - radius - 4;
+        const y = py + radius + 4;
+
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.75)';
+        ctx.beginPath();
+        ctx.arc(x, y, radius, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.fillStyle = 'white';
+        ctx.font = `bold ${Math.round(cs * 0.24)}px Arial`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(count, x, y);
     }
 
     #drawPrimaryUnit(ctx, unit, gm, px, py, cs) {
@@ -153,8 +179,36 @@ export class Renderer {
         }
 
         if (isValidMove && !isSelected) {
-            ctx.fillStyle = COLORS.validMove;
-            ctx.fillRect(px, py, cs, cs);
+
+            const size = cs * 0.22;
+            const offset = 4;
+
+            ctx.strokeStyle = COLORS.red;
+            ctx.lineWidth = 3;
+
+            ctx.beginPath();
+            ctx.moveTo(px + offset, py + size);
+            ctx.lineTo(px + offset, py + offset);
+            ctx.lineTo(px + size, py + offset);
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.moveTo(px + cs - size, py + offset);
+            ctx.lineTo(px + cs - offset, py + offset);
+            ctx.lineTo(px + cs - offset, py + size);
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.moveTo(px + offset, py + cs - size);
+            ctx.lineTo(px + offset, py + cs - offset);
+            ctx.lineTo(px + size, py + cs - offset);
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.moveTo(px + cs - size, py + cs - offset);
+            ctx.lineTo(px + cs - offset, py + cs - offset);
+            ctx.lineTo(px + cs - offset, py + cs - size);
+            ctx.stroke();
         }
 
         if (isHovered && !isSelected) {
@@ -200,15 +254,24 @@ export class Renderer {
 
     async loadAssets() {
         if (this.isReady) return;
-        try {
-            const img = new Image();
-            img.src = './assets/Grass_Tile.png';
-            this.tileLibrary[0] = img;
-            this.isReady = true;
-            console.log("Assets processed successfully");
-        } catch (e) {
-            console.error("Asset loading failed", e);
-        }
+
+        const paths = [
+            './assets/Grass_Tile.png',
+            './assets/Blue_Grass_Tile.png',
+            './assets/Red_Grass_Tile.png'
+        ];
+
+        this.tileLibrary = await Promise.all(
+            paths.map(path => {
+                return new Promise(resolve => {
+                    const img = new Image();
+                    img.onload = () => resolve(img);
+                    img.src = path;
+                });
+            })
+        );
+
+        this.isReady = true;
     }
 
     async loadUnitAssets(level) {

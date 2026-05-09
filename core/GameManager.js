@@ -46,6 +46,13 @@ export class GameManager {
         ];
         this.placementIndex = { 1: 0, 2: 0 };
 
+        this.diceRolls = {
+            1: null,
+            2: null
+        };
+
+        this.dicePlayerTurn = 1;
+
         this.setPhase(GamePhase.PLACEMENT);
     }
 
@@ -124,13 +131,25 @@ export class GameManager {
     placeUnit(coords) {
         /* Places selected unit from the panel in the desired cell of the spawn zone during placement phase.*/
         if (!this.unitsLeft[this.currentPlayer]) return false;
+        if (!this.isInSpawnZone(this.currentPlayer, coords.y)) return false;
         const cell = this.grid.matrix[coords.y][coords.x];
-        console.log(cell);
         const unit = this.createUnit(this.selectedPlacementUnit, this.currentPlayer, coords.x, coords.y);
+        if (!this.canStackUnit(cell, unit)) return false;
         cell.units.push(unit);
+        cell.owner = this.currentPlayer;
         this.selectedPlacementUnit = null;
         this.unitsLeft[this.currentPlayer] -= 1;
         return true;
+    }
+
+    canStackUnit(cell, unit) {
+        if (cell.units.length === 0) return true;
+        if (cell.units.length >= this.level.maxUnitsPerCell) return false;
+
+        const existingUnit = cell.units[0];
+
+        return existingUnit.player === unit.player &&
+            existingUnit.type === unit.type;
     }
 
     movePlacementUnit(unit, x, y) {
@@ -138,11 +157,9 @@ export class GameManager {
         if (!unit || this.phase !== GamePhase.PLACEMENT) return false;
         if (unit.player !== this.currentPlayer) return false;
         if (!this.grid.isInBounds(x, y)) return false;
-
-        const target = this.grid.matrix[y][x];
-        if (target.units.length > 0 && target.units[0].player !== unit.player) return false;
         if (!this.isInSpawnZone(unit.player, y)) return false;
-
+        const target = this.grid.matrix[y][x];
+        if (!this.canStackUnit(target, unit)) return false;
         const source = this.grid.matrix[unit.y][unit.x];
         source.units = source.units.filter(u => u !== unit);
         source.owner = source.units.length ? source.units[0].player : null;
@@ -205,6 +222,36 @@ export class GameManager {
             unitDiv.innerHTML = `<img src="assets/units/${type.toLowerCase()}.png" class="unit-icon">`;
             container.appendChild(unitDiv);
         });
+    }
+
+    reset() {
+        this.grid = new Grid(this.level.gridSize);
+
+        this.units = { 1: [], 2: [] };
+
+        this.currentPlayer = 1;
+        this.placingPlayer = 1;
+        this.turnCount = 1;
+
+        this.unitsLeft = {
+            1: this.level.unitsPerPlayer,
+            2: this.level.unitsPerPlayer,
+        };
+
+        this.selectedUnit = null;
+        this.selectedPlacementUnit = null;
+
+        this.validMoves = [];
+        this.validAttacks = [];
+
+        this.phaseTimedOut = false;
+
+        this.placementIndex = {
+            1: 0,
+            2: 0
+        };
+
+        this.setPhase(GamePhase.PLACEMENT);
     }
 }
 
