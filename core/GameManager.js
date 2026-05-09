@@ -204,9 +204,9 @@ export class GameManager {
 
     renderPlacementUnits() {
         const unitTypes = [
-            { type: UnitType.SOLDIER, cssClass: '.soldier' },
-            { type: UnitType.RIDER,   cssClass: '.rider'   },
-            { type: UnitType.TANK,    cssClass: '.tank'    },
+            { type: UnitType.SOLDIER, cssClass: '.soldier'},
+            { type: UnitType.RIDER, cssClass: '.rider'},
+            { type: UnitType.TANK, cssClass: '.tank'},
         ];
  
         unitTypes.forEach(({ type, cssClass }) => {

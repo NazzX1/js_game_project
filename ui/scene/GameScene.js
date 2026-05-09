@@ -306,16 +306,36 @@ export class GameScene extends Scene {
         }
 
         if (this.logic.phase === GamePhase.MOVEMENT) {
+            if (this.logic.selectedUnit) {
 
-            if (clickedUnit && clickedUnit.player === this.logic.currentPlayer) {
-                if (clickedUnit.hasMoved) return;
-                this.logic.selectedUnit = clickedUnit;
-                this.logic.validMoves = this.logic.getValidMoves(clickedUnit);
-                return;
+                const isValidMove = this.logic.validMoves.some(
+                    move => move.x === coords.x && move.y === coords.y
+                );
+
+                if (isValidMove) {
+                    const moved = this.#moveUnit(
+                        this.logic.selectedUnit,
+                        coords.x,
+                        coords.y
+                    );
+
+                    if (moved) return;
+                }
+
+                if (
+                    clickedUnit &&
+                    clickedUnit.player === this.logic.currentPlayer &&
+                    clickedUnit !== this.logic.selectedUnit
+                ) {
+                    this.logic.selectedUnit = clickedUnit;
+                    this.logic.validMoves = this.logic.getValidMoves(clickedUnit);
+                    return;
+                }
             }
 
-            if (this.logic.selectedUnit) {
-                this.#moveUnit(this.logic.selectedUnit, coords.x, coords.y);
+            if (clickedUnit && clickedUnit.player === this.logic.currentPlayer) {
+                this.logic.selectedUnit = clickedUnit;
+                this.logic.validMoves = this.logic.getValidMoves(clickedUnit);
                 return;
             }
         }
@@ -348,13 +368,12 @@ export class GameScene extends Scene {
 
         if (!isValidMove) return false;
 
-        const source = this.logic.grid.matrix[unit.y][unit.x];
-        source.units = source.units.filter(u => u !== unit);
-        source.owner = source.units.length ? source.units[0].player : null;
-
         const target = this.logic.grid.matrix[y][x];
         if (!this.logic.canStackUnit(target, unit)) return false;
-
+        
+        const source = this.logic.grid.matrix[unit.y][unit.x];
+        source.units = source.units.filter(u => u !== unit);
+        
         target.units.push(unit);
         target.owner = unit.player;
 
