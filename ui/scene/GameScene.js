@@ -8,10 +8,10 @@ export class GameScene extends Scene {
     
     constructor(app) {
         super();
-        this.app      = app;
-        this.logic    = null;
+        this.app = app;
+        this.logic = null;
         this.renderer = null;
-        this.vsAI     = this.app.vsAI;
+        this.vsAI = this.app.vsAI;
         this.timerDisplay = null;
         this.turnNotice = null;
         this.turnNoticeTimeout = null;
@@ -26,9 +26,9 @@ export class GameScene extends Scene {
             gameSceneElement.classList.remove('hidden', 'fade-out');
         }
 
-        this.logic    = new GameManager(1);
+        this.logic = this.logic = new GameManager(1, this.app.phaseTimer);
         this.renderer = new Renderer('game-canvas', this.logic.config.gridSize);
-        this.vsAI     = this.app.vsAI !== false;
+        this.vsAI = this.app.vsAI !== false;
         this.timerDisplay = document.getElementById('timer-display');
         this.phaseDisplay = document.getElementById('phase-display');
         this.placementModal = document.getElementById('placement-modal');
@@ -99,6 +99,7 @@ export class GameScene extends Scene {
         this.logic.dice.loadAssets();
         this.logic.renderPlacementUnits();
         this.#selectPlacementUnitFromPanel();
+        this.#hideSelectedUnitInfo();
 
         this.turnNotice = document.getElementById('turn-notice');
         this.lastUpdateTime = performance.now();
@@ -218,6 +219,11 @@ export class GameScene extends Scene {
 
     #updateTimerDisplay() {
         if (!this.timerDisplay || !this.logic) return;
+
+        if (this.logic.getPhaseTime(this.logic.phase) === 0) {
+            this.timerDisplay.textContent = "Off";
+            return;
+        }
 
         const seconds = Math.max(0, Math.ceil(this.logic.phaseTimeLeft));
         this.timerDisplay.textContent = `${seconds}s`;
@@ -396,7 +402,6 @@ export class GameScene extends Scene {
                 }
             }
 
-            // Show attack modal when clicking valid attack
             if (this.logic.selectedUnit && !this.logic.selectedUnit.hasActed) {
                 const isValidAttack = this.logic.validAttacks.some(
                     attack => attack.x === coords.x && attack.y === coords.y

@@ -9,8 +9,8 @@ export const Levels = {
         maxUnitsPerCell: 3,
         maxActionsPerTurn: 2,
         initialUnits: {
-            [UnitType.SOLDIER]: 3,
-            [UnitType.RIDER]:   1,
+            [UnitType.SOLDIER]: 5,
+            [UnitType.RIDER]:   3,
             [UnitType.TANK]:    1,
         },
         phaseTimers: {

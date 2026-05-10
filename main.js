@@ -5,12 +5,14 @@ import { SceneType }    from './data/Enums.js';
 class App {
     constructor() {
         this.canvas = document.getElementById('game-canvas');
-        this.ctx    = this.canvas.getContext('2d');
-        this.vsAI   = true;  
+        this.ctx = this.canvas.getContext('2d');
+        this.vsAI = true;
+        this.difficulty = "normal";
+        this.phaseTimer = 0;
 
         this.scenes = {
-            [SceneType.HOME]:    new HomeScene(this),
-            [SceneType.GAME]:    new GameScene(this),
+            [SceneType.HOME]: new HomeScene(this),
+            [SceneType.GAME]: new GameScene(this),
         };
 
         this.currentScene = null;

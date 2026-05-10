@@ -4,7 +4,7 @@ import { SceneType } from '../../data/Enums.js';
 export class HomeScene extends Scene {
     constructor(app) {
         super();
-        this.app        = app;
+        this.app = app;
         this.domElement = document.getElementById('home-scene');
     }
 
@@ -59,6 +59,12 @@ export class HomeScene extends Scene {
         if (btnSettingsConfirm && settingsContainer) {
             btnSettingsConfirm.onclick = () => {
                 settingsContainer.classList.remove('open');
+
+                const selectedTimer = document.querySelector(".seg-btn.timer.active");
+
+                if (selectedTimer) {
+                    this.app.phaseTimer = Number(selectedTimer.dataset.timer);
+                }
             };
         }
 
@@ -66,6 +72,7 @@ export class HomeScene extends Scene {
             settingsContainer.onclick = (e) => {
                 if (e.target === settingsContainer)
                     settingsContainer.classList.remove('open');
+
             };
         }
     }

@@ -9,18 +9,17 @@ import { Tank } from './Tank.js';
 import { Dice } from './Dice.js';
 
 export class GameManager {
-    constructor(level) {
+    constructor(level, phaseTimer) {
         this.level = Levels[level];
         this.config = this.level;
         this.grid = new Grid(this.level.gridSize);
         this.grid.generateSpecials(this.level);
         this.initialUnits = this.level.initialUnits || {
-            [UnitType.SOLDIER]: 3,
-            [UnitType.RIDER]: 1,
+            [UnitType.SOLDIER]: 5,
+            [UnitType.RIDER]: 3,
             [UnitType.TANK]: 1,
         };
-        this.unitsPerPlayer = Object.values(this.initialUnits)
-            .reduce((total, count) => total + count, 0);
+        this.unitsPerPlayer = this.level.unitsPerPlayer;
         this.maxActionsPerTurn = this.level.maxActionsPerTurn ?? Infinity;
 
         this.units = { 1: [], 2: [] }; 
@@ -44,6 +43,9 @@ export class GameManager {
         this.selectedPlacementUnit = null;
         this.ai = new AIPlayer(this);
         this.winner = null;
+
+        this.level.phaseTimers[GamePhase.PLACEMENT] = phaseTimer;
+        this.level.phaseTimers[GamePhase.MOVEMENT] = phaseTimer;
 
         this.phaseTimers = this.level.phaseTimers || {
             [GamePhase.PLACEMENT]: 30,
@@ -88,7 +90,10 @@ export class GameManager {
     updatePhaseTimer(deltaMs) {
         if (this.phase === GamePhase.FINISHED) return;
         if (this.timerPaused) return;
+        if (this.getPhaseTime(this.phase) === 0) return;
+
         this.phaseTimeLeft -= deltaMs / 1000;
+
         if (this.phaseTimeLeft <= 0) {
             this.phaseTimeLeft = 0;
             this.phaseTimedOut = true;
