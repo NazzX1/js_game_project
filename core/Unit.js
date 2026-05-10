@@ -5,6 +5,7 @@ export class Unit {
         this.name      = stats.name;
         this.moveRange = stats.move;
         this.force     = stats.force;
+        this.defense   = stats.defense ?? 0;
         this.maxHealth = stats.health ?? 1;
         this.health    = this.maxHealth;
         this.allowedDirections = stats.directions || [
@@ -36,13 +37,22 @@ export class Unit {
 
     takeDamage(amount) {
         if (!this.alive || amount <= 0) return;
-        this.health = Math.max(0, this.health - amount);
-        if (this.health === 0) {
-            this.alive = false;
+
+        // Defense acts as a shield that decays when hit
+        const absorbed = Math.min(this.defense, amount);
+        this.defense -= absorbed;
+        const remainingDamage = amount - absorbed;
+
+        if (remainingDamage > 0) {
+            this.health = Math.max(0, this.health - remainingDamage);
+            if (this.health <= 0) {
+                this.health = 0;
+                this.alive = false;
+            }
         }
     }
 
-    attack(target) {
+    attack(target, bonus = 0) {
         if (this.hasActed) return false;
         if (!target || !target.alive || target.player === this.player) return false;
 
@@ -52,7 +62,7 @@ export class Unit {
         const distance = Math.abs(this.x - target.x) + Math.abs(this.y - target.y);
         if (distance < this.minAttackRange || distance > this.maxAttackRange) return false;
 
-        target.takeDamage(this.force);
+        target.takeDamage(this.force + bonus);
         this.hasActed = true;
         return true;
     }

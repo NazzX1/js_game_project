@@ -8,6 +8,7 @@ export class Soldier extends Unit {
             name: 'Soldier',
             move: 2,
             force: 1,
+            defense: 1,
             health: 3,
             directions: [
                 [-1, 0], [1, 0], [0, -1], [0, 1],

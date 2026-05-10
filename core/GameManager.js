@@ -6,6 +6,7 @@ import { AIPlayer } from './AIPlayer.js';
 import { Soldier } from './Soldier.js';
 import { Rider } from './Rider.js';
 import { Tank } from './Tank.js';
+import { Dice } from './Dice.js';
 
 export class GameManager {
     constructor(level) {
@@ -35,8 +36,10 @@ export class GameManager {
         this.unitTypesLeft = this.#createUnitTypesLeft();
         this.actionsThisTurn = 0;
         
+        this.dice = new Dice();
         this.selectedUnit = null;
         this.validMoves = [];
+        this.timerPaused = false;
         this.validAttacks = [];
         this.selectedPlacementUnit = null;
         this.ai = new AIPlayer(this);
@@ -50,13 +53,6 @@ export class GameManager {
 
         this.placementOrder = this.#createPlacementOrder();
         this.placementIndex = { 1: 0, 2: 0 };
-
-        this.diceRolls = {
-            1: null,
-            2: null
-        };
-
-        this.dicePlayerTurn = 1;
 
         this.setPhase(GamePhase.PLACEMENT);
     }
@@ -90,6 +86,7 @@ export class GameManager {
 
     updatePhaseTimer(deltaMs) {
         if (this.phase === GamePhase.FINISHED) return;
+        if (this.timerPaused) return;
         this.phaseTimeLeft -= deltaMs / 1000;
         if (this.phaseTimeLeft <= 0) {
             this.phaseTimeLeft = 0;
@@ -103,6 +100,7 @@ export class GameManager {
         this.validMoves = [];
         this.validAttacks = [];
         this.actionsThisTurn = 0;
+        this.dice.bonus = 0;
         this.phaseTimedOut = false;
         this.phaseTimeLeft = this.getPhaseTime(this.phase);
     }
@@ -254,7 +252,7 @@ export class GameManager {
 
     performAttack(attacker, defender) {
         if (!attacker || !defender) return;
-        const attackResult = attacker.attack(defender);
+        const attackResult = attacker.attack(defender, this.dice.bonus);
         if (!attackResult) return false;
 
         this.recordAction();
@@ -341,6 +339,8 @@ export class GameManager {
 
         this.validMoves = [];
         this.validAttacks = [];
+
+        this.dice.reset();
 
         this.phaseTimedOut = false;
 

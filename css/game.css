@@ -286,7 +286,7 @@
     color: var(--red-light);
 }
 
-#roll-dice {
+#dice-roll{
     display: flex;
     background: var(--surface);
     backdrop-filter: blur(20px);
@@ -297,12 +297,28 @@
     font-size: 12px;
 }
 
+
+
 #dice-value {
     display: flex;
     flex-direction: column;
     gap:10px;
     font-size: 12px;
+    margin-bottom: 10px;
 }
+
+
+.dice-img{
+    padding: 10px;
+}
+
+#start-dice-turn-text{
+ padding: 10px;
+ color: var(--green-light);
+}
+
+
+
 
 #starting-player {
     font-size: 13px;

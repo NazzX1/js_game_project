@@ -24,7 +24,7 @@
 }
 
 .hidden {
-    display: none;
+    display: none !important;
 }
 
 /* ── BUTTONS ── */
@@ -80,6 +80,3 @@
     color: var(--text);
     background: var(--p1bg);
 }
-
-
-

@@ -87,6 +87,14 @@
                         <div class="active-player-role active-player" id="active-player-role">Player <span id="active-player-number">1</span></div>
                     </div>
                 </div>
+
+                <div id="total-occupied-cells-block">
+                    <div class="panel-label">Cells occupied</div>
+                    <p>Player 1 : <span class="total-occupied-cells">0</span></p>
+                    <p>Player 2 : <span class="total-occupied-cells">0</span></p>
+                </div>
+
+                
                 <div class="units" id="units-panel">
                     <h1>Units</h1>
                     <div class="units-cards">
@@ -115,12 +123,6 @@
                     <div id="phase-display" class="phase-display">Placement</div>
                 </div>
 
-                <div id="total-occupied-cells-block">
-                    <div class="panel-label">Cells occupied</div>
-                    <p>Player 1 : <span class="total-occupied-cells">0</span></p>
-                    <p>Player 2 : <span class="total-occupied-cells">0</span></p>
-                </div>
-
                 <!--
                 <div class="action-btns">
                     <div class="panel-label">Actions</div>
@@ -143,9 +145,10 @@
                     <button class="primary-btn hidden" id="placement-done-btn">Start Battle</button>
                 </div>
 
-                <div id="roll-dice" class="game-info hidden">
+                <div id="dice-roll" class="game-info hidden">
                     <div class="panel-label">Roll Dice</div>
                     <div id="dice-turn-text">Player 1 roll</div>
+                    <div id="dice-img-container" class="dice-img"></div>
                     <button class="primary-btn" id="roll-dice-btn">Roll</button>
                     <div id="dice-value"></div>
                     <div id="starting-player"></div>
@@ -162,6 +165,17 @@
                 </div>
                 <p>Arrange your units on the first row before the battle begins. Click one of your units, then click an empty spawn cell to move it.</p>
                 <button class="primary-btn" id="placement-modal-btn">Got it</button>
+            </div>
+        </div>
+
+        <div id="start-player-modal" class="container-bg">
+            <div class="modal-card">
+                <div class="panel-label">Who is starting?</div>
+                <div id="start-dice-turn-text">rolling...</div>
+                <div id="start-dice-img-container" class="dice-img"></div>
+                <div id="start-dice-value" class="dice-value"></div>
+                <div id="start-player-result" class="gold-text"></div>
+                <button class="primary-btn" id="start-continue-btn">Start Roll</button>
             </div>
         </div>
 

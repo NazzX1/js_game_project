@@ -8,6 +8,7 @@ export class Rider extends Unit {
             name: 'Rider',
             move: 3,
             force: 1,
+            defense: 0,
             health: 4,
             directions: [[0, -1]]
         };

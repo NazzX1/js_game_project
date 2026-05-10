@@ -9,6 +9,7 @@ export class Tank extends Unit {
             name: 'Tank',
             move: 1,
             force: 3,
+            defense: 2,
             health: 5,
             directions: [
                 [-1, 0], [1, 0], [0, -1], [0, 1]

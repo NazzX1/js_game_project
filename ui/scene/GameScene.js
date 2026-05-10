@@ -44,10 +44,6 @@ export class GameScene extends Scene {
             this.diceRollDiv.classList.add("hidden");
         }
 
-        this.rollDiceButton = document.getElementById('roll-dice-btn');
-        this.rollDiceButton.disabled = false;
-        this.diceValueText = document.getElementById("dice-value");
-        this.diceValueText.innerHTML = "";
 
         this.unitsPanel = document.getElementById("units-panel");
         this.unitsPanel.classList.remove("hidden");
@@ -89,6 +85,7 @@ export class GameScene extends Scene {
         }
 
         this.renderer.loadUnitAssets(this.logic.level);
+        this.logic.dice.loadAssets();
         this.logic.renderPlacementUnits();
         this.#selectPlacementUnitFromPanel();
 
@@ -99,7 +96,7 @@ export class GameScene extends Scene {
         this.#updateTimerDisplay();
         this.#updateActionsDisplay();
 
-        this.#resetDiceRoll();
+        this.logic.dice.reset();
 
          // left click
         this.renderer.canvas.addEventListener('click', this._leftClickHandler);
@@ -196,6 +193,11 @@ export class GameScene extends Scene {
             [GamePhase.FINISHED]: 'Finished',
         };
         this.phaseDisplay.textContent = phaseLabels[this.logic.phase] || this.logic.phase;
+
+        if (this.diceRollDiv) {
+            // Show the dice roll panel strictly during the Movement phase
+            this.diceRollDiv.classList.toggle('hidden', this.logic.phase !== GamePhase.MOVEMENT);
+        }
     }
 
     #updateTimerDisplay() {
@@ -219,54 +221,22 @@ export class GameScene extends Scene {
         }
     }
 
-    #startDiceRoll() {
-        const diceTurnText = document.getElementById('dice-turn-text');
-        const startingPlayerText = document.getElementById("starting-player");
-
-        this.#resetDiceRoll();
-        this.diceRollDiv?.classList.remove('hidden');
-
-        this.rollDiceButton.onclick = () => {
-            const player = this.logic.dicePlayerTurn;
-            const roll = Math.ceil(Math.random() * 6);
-
-            this.logic.diceRolls[player] = roll;
-            this.diceValueText.innerHTML += `<p>Player ${player} got ${roll}</p>`;
-
-            if (player === 1 && !this.vsAI) {
-                this.logic.dicePlayerTurn = 2;
-                diceTurnText.innerText = "Player 2 roll";
-                return;
-            }
-
-            if (player === 1 && this.vsAI) {
-                const aiRoll = Math.ceil(Math.random() * 6);
-                this.logic.diceRolls[2] = aiRoll;
-                this.diceValueText.innerHTML += `<p>Player 2 got ${aiRoll}</p>`;
-            }
-
-            this.#finishDiceRoll(startingPlayerText);
-        };
+    async #startDiceRoll() {
+        this.logic.timerPaused = true;
+        await this.logic.dice.performInitialRollsFlow();
+        this.logic.timerPaused = false;
+        this.#finishDiceRoll();
     }
 
-    #finishDiceRoll(startingPlayerText) {
-        const p1 = this.logic.diceRolls[1];
-        const p2 = this.logic.diceRolls[2];
-
-        if (p1 > p2) {
-            this.logic.setFirstPlayer(1);
-            startingPlayerText.innerText = "Player 1 starts";
-        } else if (p2 > p1) {
-            this.logic.setFirstPlayer(2);
-            startingPlayerText.innerText = "Player 2 starts";
-        } else {
-            let x = Math.ceil(Math.random() * 2);
-            this.logic.setFirstPlayer(x);
-            startingPlayerText.innerText = `Player ${x} starts`;
-        }
-
-        this.rollDiceButton.disabled = true;
+    #finishDiceRoll() {
+        const startingPlayer = this.logic.dice.determineStartingPlayer();
+        this.logic.setFirstPlayer(startingPlayer);
         this.#updatePlayerTurnDisplay();
+        setTimeout(() => this.#rollForTurnBonus(), 1000);
+    }
+
+    async #rollForTurnBonus() {
+        await this.logic.dice.performBonusRollFlow(this.logic.currentPlayer);
     }
 
     #verifyPlayerHasPlacedUnits(player) {
@@ -448,7 +418,8 @@ export class GameScene extends Scene {
         }
         const attackerAttack = document.getElementById("attacker-attack");
         if (attackerAttack) {
-            attackerAttack.innerText = attacker.force;
+            const bonusText = this.logic.dice.bonus > 0 ? ` (+${this.logic.dice.bonus})` : "";
+            attackerAttack.innerText = `${attacker.force}${bonusText}`;
         }
 
         const defenderName = document.getElementById("defender-name");
@@ -461,7 +432,7 @@ export class GameScene extends Scene {
         }
         const defenderDefense = document.getElementById("defender-defense");
         if (defenderDefense) {
-            defenderDefense.innerText = defender.force;
+            defenderDefense.innerText = defender.defense;
         }
 
         const battleTip = document.getElementById("battle-tip");
@@ -559,6 +530,11 @@ export class GameScene extends Scene {
         this.#updatePlayerTurnDisplay();
         this.#updateActionsDisplay();
 
+        // Only roll for attack bonuses during active gameplay phases, not during placement
+        if (this.logic.phase !== GamePhase.PLACEMENT && this.logic.phase !== GamePhase.FINISHED) {
+            this.#rollForTurnBonus();
+        }
+
         if (this.logic.units) {
             this.logic.units[this.logic.currentPlayer].forEach(unit => {
                 unit.resetTurn();
@@ -600,40 +576,4 @@ export class GameScene extends Scene {
         }
     }
 
-    #resetDiceRoll() {
-
-        this.logic.diceRolls = {
-            1: null,
-            2: null
-        };
-
-        this.logic.dicePlayerTurn = 1;
-
-        if (this.diceRollDiv) {
-            this.diceRollDiv.classList.add("hidden");
-        }
-
-        if (this.rollDiceButton) {
-            this.rollDiceButton.disabled = false;
-            this.rollDiceButton.onclick = null;
-        }
-
-        if (this.diceValueText) {
-            this.diceValueText.innerHTML = "";
-        }
-
-        const startingPlayerText =
-            document.getElementById("starting-player");
-
-        if (startingPlayerText) {
-            startingPlayerText.innerText = "";
-        }
-
-        const diceTurnText =
-            document.getElementById("dice-turn-text");
-
-        if (diceTurnText) {
-            diceTurnText.innerText = "Player 1 roll";
-        }
-    }
 }

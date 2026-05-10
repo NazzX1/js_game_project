@@ -279,14 +279,14 @@ export class Renderer {
     async loadAssets() {
         if (this.isReady) return;
 
-        const paths = [
+        const tiles_paths = [
             './assets/Grass_Tile.png',
             './assets/Blue_Grass_Tile.png',
             './assets/Red_Grass_Tile.png'
         ];
 
         this.tileLibrary = await Promise.all(
-            paths.map(path => {
+            tiles_paths.map(path => {
                 return new Promise(resolve => {
                     const img = new Image();
                     img.onload = () => resolve(img);

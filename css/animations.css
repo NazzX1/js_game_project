@@ -15,3 +15,27 @@
         transform: scale(1); 
     }
 }
+
+.dice-icon {
+    width: 80px;
+    height: 80px;
+    object-fit: contain;
+    display: block;
+    margin: 0 auto;
+}
+
+.dice-icon-sm {
+    width: 44px;
+    height: 44px;
+    object-fit: contain;
+}
+
+.dice-rolling {
+    animation: diceJitter 0.12s infinite ease-in-out;
+}
+
+@keyframes diceJitter {
+    0% { transform: rotate(-12deg) scale(1.05); }
+    50% { transform: rotate(12deg) scale(0.95); }
+    100% { transform: rotate(-12deg) scale(1.05); }
+}
