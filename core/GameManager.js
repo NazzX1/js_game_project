@@ -208,7 +208,7 @@ export class GameManager {
 
         const source = this.grid.matrix[unit.y][unit.x];
         source.units = source.units.filter(u => u !== unit);
-        source.owner = source.units.length ? source.units[0].player : null;
+        //source.owner = source.units.length ? source.units[0].player : null;
 
         target.units.push(unit);
         target.owner = unit.player;
