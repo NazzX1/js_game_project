@@ -9,6 +9,7 @@ class App {
         this.vsAI = true;
         this.difficulty = "normal";
         this.phaseTimer = 0;
+        this.gridSize = 8;
 
         this.scenes = {
             [SceneType.HOME]: new HomeScene(this),

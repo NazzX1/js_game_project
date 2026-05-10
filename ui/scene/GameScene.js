@@ -26,7 +26,7 @@ export class GameScene extends Scene {
             gameSceneElement.classList.remove('hidden', 'fade-out');
         }
 
-        this.logic = this.logic = new GameManager(1, this.app.phaseTimer);
+        this.logic = this.logic = new GameManager(1, this.app.phaseTimer, this.app.gridSize);
         this.renderer = new Renderer('game-canvas', this.logic.config.gridSize);
         this.vsAI = this.app.vsAI !== false;
         this.timerDisplay = document.getElementById('timer-display');

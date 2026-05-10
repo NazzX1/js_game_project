@@ -9,8 +9,10 @@ import { Tank } from './Tank.js';
 import { Dice } from './Dice.js';
 
 export class GameManager {
-    constructor(level, phaseTimer) {
+    constructor(level, phaseTimer, gridSize) {
         this.level = Levels[level];
+        this.level.gridSize = gridSize || 8;
+        this.level.victoryCells = this.level.gridSize * this.level.gridSize / 2 + 1;
         this.config = this.level;
         this.grid = new Grid(this.level.gridSize);
         this.grid.generateSpecials(this.level);

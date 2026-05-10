@@ -4,6 +4,7 @@ export class Grid {
     constructor(size) {
         this.size   = size;
         this.matrix = this.#createEmpty(size);
+        console.log(this.size);
     }
 
     #createEmpty(size) {

@@ -42,8 +42,15 @@ export class HomeScene extends Scene {
         const settingsContainer = document.getElementById('settings-container');
         const btnSettingsBack = document.getElementById('settings-back-btn');
         const btnSettingsConfirm = document.getElementById('settings-confirm-btn');
+        const gridSizeSlider = document.getElementById('grid-size-slider');
+        const gridSizeValue = document.getElementById('grid-size-value');
 
-        
+        if (gridSizeSlider && gridSizeValue) {
+            gridSizeSlider.addEventListener('input', () => {
+                gridSizeValue.textContent = gridSizeSlider.value;
+            });
+        }
+
         if (btnSettings && settingsContainer) {
             btnSettings.onclick = () => {
                 settingsContainer.classList.add('open');
@@ -64,6 +71,10 @@ export class HomeScene extends Scene {
 
                 if (selectedTimer) {
                     this.app.phaseTimer = Number(selectedTimer.dataset.timer);
+                }
+                const gridSizeSlider = document.getElementById('grid-size-slider');
+                if (gridSizeSlider) {
+                    this.app.gridSize = Number(gridSizeSlider.value);
                 }
             };
         }
