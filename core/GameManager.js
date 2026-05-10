@@ -198,6 +198,31 @@ export class GameManager {
         return true;
     }
 
+    moveUnit(unit, x, y) {
+        if (!unit || this.phase !== GamePhase.MOVEMENT) return false;
+        if (unit.player !== this.currentPlayer) return false;
+        if (!this.grid.isInBounds(x, y)) return false;
+
+        const target = this.grid.matrix[y][x];
+        if (!this.canStackUnit(target, unit)) return false;
+
+        const source = this.grid.matrix[unit.y][unit.x];
+        source.units = source.units.filter(u => u !== unit);
+        source.owner = source.units.length ? source.units[0].player : null;
+
+        target.units.push(unit);
+        target.owner = unit.player;
+        unit.x = x;
+        unit.y = y;
+        unit.hasMoved = true;
+
+        this.applyCellEffect(unit);
+        this.recordAction();
+        this.checkWinCondition();
+
+        return true;
+    }
+
     selectUnit(unit) {
         if (!unit || unit.player !== this.currentPlayer) return;
         this.selectedUnit = unit;

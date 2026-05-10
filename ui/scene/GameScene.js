@@ -252,6 +252,19 @@ export class GameScene extends Scene {
 
     async #rollForTurnBonus() {
         await this.logic.dice.performBonusRollFlow(this.logic.currentPlayer);
+
+        
+        if (this.vsAI && this.logic.currentPlayer === 2 && this.logic.phase !== GamePhase.FINISHED) {
+            this.#handleAITurn();
+        }
+    }
+
+    async #handleAITurn() {
+        await new Promise(resolve => setTimeout(resolve, 1000)); 
+        this.logic.ai.playTurn();
+        this.#updateOccupiedCellsDisplay();
+        this.#updateActionsDisplay();
+        this.#completeTurn(); 
     }
 
     #verifyPlayerHasPlacedUnits(player) {
@@ -309,7 +322,7 @@ export class GameScene extends Scene {
 
         if (this.logic.phase === GamePhase.PLACEMENT) {
 
-            // Place units from panel.
+          
             if ( this.logic.selectedPlacementUnit) {
                 const placed = this.logic.placeUnit(coords);
 
@@ -322,7 +335,7 @@ export class GameScene extends Scene {
                 return;
             }
 
-            // Move already placed units on the grid.
+          
             if (this.logic.selectedUnit) {
                 const moved = this.logic.movePlacementUnit(
                     this.logic.selectedUnit,
@@ -337,10 +350,10 @@ export class GameScene extends Scene {
                 return;
             }
 
-            // Select clicked unit.
+           
             if (clickedUnit && clickedUnit.player === this.logic.currentPlayer) {
                 this.logic.selectedUnit = clickedUnit;
-                //console.log("selected unit:", clickedUnit);
+                
                 return;
             }
         }
@@ -371,7 +384,6 @@ export class GameScene extends Scene {
                         const movedUnits = this.logic.grid.matrix[coords.y][coords.x].units;
                         this.#notifyCellEffect(movedUnits[movedUnits.length - 1]);
                         this.#updateOccupiedCellsDisplay();
-                        this.logic.recordAction();
                         this.#updateActionsDisplay();
                         this.#autoEndTurnIfNeeded();
                         return;
@@ -501,26 +513,12 @@ export class GameScene extends Scene {
 
         if (!isValidMove) return false;
 
-        const target = this.logic.grid.matrix[y][x];
-        if (!this.logic.canStackUnit(target, unit)) return false;
-        
-        const source = this.logic.grid.matrix[unit.y][unit.x];
-        source.units = source.units.filter(u => u !== unit);
-        
-        target.units.push(unit);
-        target.owner = unit.player;
-
-        unit.x = x;
-        unit.y = y;
-        unit.hasMoved = true;
+        const moved = this.logic.moveUnit(unit, x, y);
 
         this.logic.selectedUnit = null;
         this.logic.validMoves = [];
         this.logic.validAttacks = [];
-
-        this.logic.checkWinCondition();
-
-        return true;
+        return moved;
     }
 
     update() {
@@ -547,7 +545,6 @@ export class GameScene extends Scene {
         this.#updatePlayerTurnDisplay();
         this.#updateActionsDisplay();
 
-        // Only roll for attack bonuses during active gameplay phases, not during placement
         if (this.logic.phase !== GamePhase.PLACEMENT && this.logic.phase !== GamePhase.FINISHED) {
             this.#rollForTurnBonus();
         }
