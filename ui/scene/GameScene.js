@@ -37,6 +37,7 @@ export class GameScene extends Scene {
         this.errorModal = document.getElementById("error-modal");
         this.attackModal = document.getElementById("attack-modal");
         this.movesLeftText = document.getElementById("moves-left");
+        this.unitInfoPanel = document.getElementById("unit-info-panel");
         if (this.unitsLeftParagraph) {
             this.unitsLeftParagraph.innerText = this.logic.unitsPerPlayer;
         }
@@ -320,6 +321,8 @@ export class GameScene extends Scene {
         const cell = this.logic.grid.matrix[coords.y][coords.x];
         const clickedUnit = cell.units[0];
 
+        this.#showSelectedUnitInfo(clickedUnit);
+
         if (this.logic.phase === GamePhase.PLACEMENT) {
 
           
@@ -346,6 +349,7 @@ export class GameScene extends Scene {
                 if (moved) {
                     this.logic.selectedUnit = null;
                     this.#updateOccupiedCellsDisplay();
+                    this.#hideSelectedUnitInfo();
                 }
                 return;
             }
@@ -386,6 +390,7 @@ export class GameScene extends Scene {
                         this.#updateOccupiedCellsDisplay();
                         this.#updateActionsDisplay();
                         this.#autoEndTurnIfNeeded();
+                        this.#hideSelectedUnitInfo();
                         return;
                     }
                 }
@@ -588,6 +593,34 @@ export class GameScene extends Scene {
         if (this.renderer && this.logic) {
             this.renderer.draw(this.logic);
         }
+    }
+
+    #showSelectedUnitInfo(unit) {
+        
+        if (!this.unitInfoPanel || !unit) return;
+
+        this.unitInfoPanel.classList.remove("hidden");
+
+        const unitName = document.getElementById("selected-unit-name")
+        if (unitName) {
+            unitName.innerText = unit.type;
+        }
+        const selectedUnitHP = document.getElementById("selected-unit-hp")
+        if (selectedUnitHP) {
+            selectedUnitHP.innerText = unit.health;
+        }
+        const selectedUnitAttack = document.getElementById("selected-unit-attack")
+        if (selectedUnitAttack) {
+            selectedUnitAttack.innerText = unit.force;
+        }
+        const selectedUnitDefense = document.getElementById("selected-unit-defense")
+        if (selectedUnitDefense) {
+            selectedUnitDefense.innerText = unit.defense;
+        }
+    }
+
+    #hideSelectedUnitInfo() {
+        if (this.unitInfoPanel) this.unitInfoPanel.classList.add("hidden");
     }
 
 }

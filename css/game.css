@@ -409,3 +409,38 @@
     height: 100%;
     padding: 2px;
 }
+
+.unit-info-panel {
+    background: #161b22;
+    border: 1px solid #2b3440;
+    border-radius: 16px;
+    padding: 18px;
+    margin-top: 18px;
+}
+
+.unit-info-row {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 10px;
+    opacity: 0.9;
+}
+
+#selected-unit-name {
+    font-size: 17px;
+    font-weight: bold;
+    color: var(--text);
+    text-align: center;
+    padding: 12px;
+}
+
+.unit-info-row.hp, #selected-unit-hp {
+    color: var(--green-light);
+}
+
+.unit-info-row.attack, #selected-unit-attack {
+    color: var(--red-light);
+}
+
+.unit-info-row.defense, #selected-unit-defense {
+    color: var(--blue-light);
+}
