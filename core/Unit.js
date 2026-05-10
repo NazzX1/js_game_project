@@ -95,42 +95,6 @@ export class Unit {
         return true;
     }
 
-    /* BFS - deprecated
-    getValidMoves(grid) {
-        if (!grid) return [];
-
-        const moves = [];
-        const visited = new Set();
-        const queue = [{ x: this.x, y: this.y, dist: 0 }];
-        visited.add(`${this.x},${this.y}`);
-
-        while (queue.length > 0) {
-            const { x, y, dist } = queue.shift();
-
-            if (dist < this.moveRange) {
-                for (const [dx, dy] of this.allowedDirections) {
-                    const newX = x + dx;
-                    const newY = y + dy;
-                    const key = `${newX},${newY}`;
-
-                    if (!visited.has(key) && grid.isInBounds(newX, newY)) {
-                        visited.add(key);
-                        const cell = grid.matrix[newY][newX];
-                        const canEnter = !cell.units || cell.units.length === 0 ||
-                            (cell.units.length === 1 && cell.units[0].player === this.player);
-
-                        if (canEnter) {
-                            moves.push({ x: newX, y: newY });
-                            queue.push({ x: newX, y: newY, dist: dist + 1 });
-                        }
-                    }
-                }
-            }
-        }
-
-        return moves;
-    }
-    */
 
     getValidMoves(grid) {
 
