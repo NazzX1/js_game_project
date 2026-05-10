@@ -25,25 +25,31 @@ export class Grid {
     }
 
     
-    generateSpecials() {
-        const items = [CellType.BONUS_ATK, CellType.BONUS_DEF, CellType.TRAP];
-        
-        items.sort(() => Math.random() - 0.5);
+    generateSpecials(level = {}) {
+        const items = [
+            ...Array(level.bonusAtkCount || 0).fill(CellType.BONUS_ATK),
+            ...Array(level.bonusDefCount || 0).fill(CellType.BONUS_DEF),
+            ...Array(level.trapCount || 0).fill(CellType.TRAP),
+        ];
 
         const startRow = 2;
         const endRow = this.size - 3; 
         const rowRange = endRow - startRow + 1; 
 
-        const sectionWidth = Math.floor(this.size / 3);
+        const used = new Set();
 
-        items.forEach((type, i) => {
-            const minCol = i * sectionWidth;
-            const maxCol = (i + 1) * sectionWidth - 1;
+        items.forEach(type => {
+            let r;
+            let c;
+            let key;
 
-            const r = Math.floor(Math.random() * rowRange) + startRow;
+            do {
+                r = Math.floor(Math.random() * rowRange) + startRow;
+                c = Math.floor(Math.random() * this.size);
+                key = `${c},${r}`;
+            } while (used.has(key));
             
-            const c = Math.floor(Math.random() * (maxCol - minCol + 1)) + minCol;
-
+            used.add(key);
             this.getCell(c, r).type = type;
         });
     }

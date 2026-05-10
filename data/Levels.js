@@ -7,6 +7,12 @@ export const Levels = {
         spawnRows:    2,
         unitsPerPlayer: 5,
         maxUnitsPerCell: 3,
+        maxActionsPerTurn: 2,
+        initialUnits: {
+            [UnitType.SOLDIER]: 3,
+            [UnitType.RIDER]:   1,
+            [UnitType.TANK]:    1,
+        },
         phaseTimers: {
             [GamePhase.PLACEMENT]: 20,
             [GamePhase.MOVEMENT]:  30,

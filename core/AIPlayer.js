@@ -1,5 +1,3 @@
-import { UnitType } from '../data/Enums.js';
-
 export class AIPlayer {
     constructor(gameManager) {
         this.gm = gameManager;
@@ -7,15 +5,18 @@ export class AIPlayer {
     }
 
     placeUnits() {
-        const unitTypes = [
-            UnitType.SOLDIER,
-            UnitType.RIDER,
-            UnitType.TANK
-        ];
+        const unitTypes = [...this.gm.placementOrder];
+        let attempts = 0;
 
         while (this.gm.unitsLeft[2] > 0) {
-            const randomType = unitTypes[
-                Math.floor(Math.random() * unitTypes.length)
+            const availableTypes = unitTypes.filter(type =>
+                this.gm.canPlaceUnitType(type, 2)
+            );
+
+            if (availableTypes.length === 0) break;
+
+            const randomType = availableTypes[
+                Math.floor(Math.random() * availableTypes.length)
             ];
 
             const randomX = Math.floor(Math.random() * this.gm.grid.size);
@@ -27,7 +28,8 @@ export class AIPlayer {
             this.gm.selectedPlacementUnit = randomType;
             const placed = this.gm.placeUnit({x: randomX, y: randomY});
 
-            if (!placed) continue;
+            attempts = placed ? 0 : attempts + 1;
+            if (attempts > this.gm.grid.size * this.gm.grid.size) break;
         }
     }
 }

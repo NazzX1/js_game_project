@@ -14,8 +14,8 @@ export class Unit {
         this.x         = x;
         this.y         = y;
 
-        this.minAttackRange = stats.minAttackRange;
-        this.maxAttackRange = stats.maxAttackRange;
+        this.minAttackRange = stats.minAttackRange ?? 1;
+        this.maxAttackRange = stats.maxAttackRange ?? 1;
 
         this.hasMoved    = false;
         this.hasActed    = false;
@@ -46,8 +46,11 @@ export class Unit {
         if (this.hasActed) return false;
         if (!target || !target.alive || target.player === this.player) return false;
 
+        const sameLine = this.x === target.x || this.y === target.y;
+        if (!sameLine) return false;
+
         const distance = Math.abs(this.x - target.x) + Math.abs(this.y - target.y);
-        if (distance > 1) return false;
+        if (distance < this.minAttackRange || distance > this.maxAttackRange) return false;
 
         target.takeDamage(this.force);
         this.hasActed = true;

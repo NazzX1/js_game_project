@@ -35,8 +35,9 @@ export class GameScene extends Scene {
         this. unitsLeftParagraph = document.getElementById("units-left");
         this.errorModal = document.getElementById("error-modal");
         this.attackModal = document.getElementById("attack-modal");
+        this.movesLeftText = document.getElementById("moves-left");
         if (this.unitsLeftParagraph) {
-            this.unitsLeftParagraph.innerText = this.logic.level.unitsPerPlayer;
+            this.unitsLeftParagraph.innerText = this.logic.unitsPerPlayer;
         }
         this.diceRollDiv = document.getElementById("dice-roll");
         if (this.diceRollDiv) {
@@ -96,6 +97,7 @@ export class GameScene extends Scene {
         this.lastPhase = this.logic.phase;
         this.#updatePhaseDisplay();
         this.#updateTimerDisplay();
+        this.#updateActionsDisplay();
 
         this.#resetDiceRoll();
 
@@ -114,7 +116,7 @@ export class GameScene extends Scene {
                 if (!this.#verifyPlayerHasPlacedUnits(1)) return;
 
                 if (this.vsAI) {
-                    if (this.logic.unitsLeft[2] === this.logic.level.unitsPerPlayer) {
+                    if (this.logic.unitsLeft[2] === this.logic.unitsPerPlayer) {
                         this.logic.ai.placeUnits();
                         this.#updateOccupiedCellsDisplay();
                     }
@@ -144,17 +146,10 @@ export class GameScene extends Scene {
                     if (!this.#verifyPlayerHasPlacedUnits(this.logic.currentPlayer)) {
                         return;
                     }
-                    this.unitsLeftParagraph.innerText = this.logic.level.unitsPerPlayer;
+                    this.unitsLeftParagraph.innerText = this.logic.unitsPerPlayer;
                 }
 
-                this.logic.nextPlayerTurn();
-                this.#updateTimerDisplay();
-                this.#updatePlayerTurnDisplay();
-                if (this.logic.units) {
-                    (this.logic.units[this.logic.currentPlayer]).map(unit => {
-                        unit.resetTurn();
-                    });
-                }
+                this.#completeTurn();
             };
         }
 
@@ -275,7 +270,7 @@ export class GameScene extends Scene {
     }
 
     #verifyPlayerHasPlacedUnits(player) {
-        if (this.logic.unitsLeft[player] === this.logic.level.unitsPerPlayer) {
+        if (this.logic.unitsLeft[player] === this.logic.unitsPerPlayer) {
             this.errorModal.classList.add("open");
             document.getElementById("error-text").innerText = `Player ${player}: place at least one unit on the grid!`
             return false;
@@ -299,6 +294,7 @@ export class GameScene extends Scene {
 
                 const type = card.dataset.unitType;
                 if (!type) return;
+                if (!this.logic.canPlaceUnitType(type)) return;
 
                 document.querySelectorAll('.unit-card')
                     .forEach(c => c.classList.remove('selected'));
@@ -387,7 +383,12 @@ export class GameScene extends Scene {
                     );
 
                     if (moved) {
+                        const movedUnits = this.logic.grid.matrix[coords.y][coords.x].units;
+                        this.#notifyCellEffect(movedUnits[movedUnits.length - 1]);
                         this.#updateOccupiedCellsDisplay();
+                        this.logic.recordAction();
+                        this.#updateActionsDisplay();
+                        this.#autoEndTurnIfNeeded();
                         return;
                     }
                 }
@@ -482,8 +483,15 @@ export class GameScene extends Scene {
 
     #performAttack(attacker, defender) {
         if (!attacker || !defender) return;
-        this.logic.performAttack(attacker, defender);
+        const attacked = this.logic.performAttack(attacker, defender);
+        if (!attacked) return;
+
         this.#updateOccupiedCellsDisplay();
+        this.logic.selectedUnit = null;
+        this.logic.validMoves = [];
+        this.logic.validAttacks = [];
+        this.#updateActionsDisplay();
+        this.#autoEndTurnIfNeeded();
     }
 
     #selectBattleUnit(unit) {
@@ -522,6 +530,7 @@ export class GameScene extends Scene {
 
         this.logic.selectedUnit = null;
         this.logic.validMoves = [];
+        this.logic.validAttacks = [];
 
         return true;
     }
@@ -533,20 +542,56 @@ export class GameScene extends Scene {
         }
         this.#updateTimer();
         if (this.logic?.phaseTimedOut && [GamePhase.MOVEMENT, GamePhase.ACTION].includes(this.logic.phase)) {
-            this.logic.nextPlayerTurn();
-            this.#updateTimerDisplay();
-            this.#updatePlayerTurnDisplay();
+            this.#completeTurn();
+        }
+    }
+
+    #autoEndTurnIfNeeded() {
+        if (!this.logic || this.logic.phase !== GamePhase.MOVEMENT) return;
+        if (!this.logic.shouldAutoEndTurn()) return;
+
+        this.#completeTurn();
+    }
+
+    #completeTurn() {
+        this.logic.nextPlayerTurn();
+        this.#updateTimerDisplay();
+        this.#updatePlayerTurnDisplay();
+        this.#updateActionsDisplay();
+
+        if (this.logic.units) {
+            this.logic.units[this.logic.currentPlayer].forEach(unit => {
+                unit.resetTurn();
+            });
         }
     }
 
     #showTurnNotice(message) {
         if (!this.turnNotice) return;
         this.turnNotice.textContent = message;
+        this.turnNotice.classList.remove('hidden');
         this.turnNotice.classList.add('visible');
         clearTimeout(this.turnNoticeTimeout);
         this.turnNoticeTimeout = setTimeout(() => {
             this.turnNotice?.classList.remove('visible');
+            this.turnNotice?.classList.add('hidden');
         }, 1200);
+    }
+
+    #notifyCellEffect(unit) {
+        const message = this.logic.applyCellEffect(unit);
+        if (message) {
+            this.#showTurnNotice(message);
+        }
+    }
+
+    #updateActionsDisplay() {
+        if (!this.movesLeftText || !Number.isFinite(this.logic.maxActionsPerTurn)) return;
+
+        this.movesLeftText.innerText = Math.max(
+            0,
+            this.logic.maxActionsPerTurn - this.logic.actionsThisTurn
+        );
     }
 
     draw(ctx) {

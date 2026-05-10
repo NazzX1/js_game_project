@@ -1,4 +1,4 @@
-import { GamePhase, UnitType } from '../data/Enums.js';
+import { CellType, GamePhase, UnitType } from '../data/Enums.js';
 import { Levels } from '../data/Levels.js';
 import { Grid } from './Grid.js';
 import { Unit } from './Unit.js';
@@ -12,6 +12,15 @@ export class GameManager {
         this.level = Levels[level];
         this.config = this.level;
         this.grid = new Grid(this.level.gridSize);
+        this.grid.generateSpecials(this.level);
+        this.initialUnits = this.level.initialUnits || {
+            [UnitType.SOLDIER]: 3,
+            [UnitType.RIDER]: 1,
+            [UnitType.TANK]: 1,
+        };
+        this.unitsPerPlayer = Object.values(this.initialUnits)
+            .reduce((total, count) => total + count, 0);
+        this.maxActionsPerTurn = this.level.maxActionsPerTurn ?? Infinity;
 
         this.units = { 1: [], 2: [] }; 
         this.players = { 1: { name: 'P1' }, 2: { name: 'P2' } };
@@ -20,9 +29,11 @@ export class GameManager {
         this.placingPlayer = 1;
         this.turnCount = 1;
         this.unitsLeft = {
-            1: this.level.unitsPerPlayer,
-            2: this.level.unitsPerPlayer,
+            1: this.unitsPerPlayer,
+            2: this.unitsPerPlayer,
         };
+        this.unitTypesLeft = this.#createUnitTypesLeft();
+        this.actionsThisTurn = 0;
         
         this.selectedUnit = null;
         this.validMoves = [];
@@ -37,13 +48,7 @@ export class GameManager {
             [GamePhase.FINISHED]: 0,
         };
 
-        this.placementOrder = [
-            UnitType.SOLDIER,
-            UnitType.TANK,
-            UnitType.SOLDIER,
-            UnitType.RIDER,
-            UnitType.SOLDIER
-        ];
+        this.placementOrder = this.#createPlacementOrder();
         this.placementIndex = { 1: 0, 2: 0 };
 
         this.diceRolls = {
@@ -54,6 +59,18 @@ export class GameManager {
         this.dicePlayerTurn = 1;
 
         this.setPhase(GamePhase.PLACEMENT);
+    }
+
+    #createPlacementOrder() {
+        return Object.entries(this.initialUnits)
+            .flatMap(([type, count]) => Array(count).fill(type));
+    }
+
+    #createUnitTypesLeft() {
+        return {
+            1: { ...this.initialUnits },
+            2: { ...this.initialUnits },
+        };
     }
 
     setFirstPlayer(player) {
@@ -84,6 +101,8 @@ export class GameManager {
         this.currentPlayer = this.currentPlayer === 1 ? 2 : 1;
         this.selectedUnit = null;
         this.validMoves = [];
+        this.validAttacks = [];
+        this.actionsThisTurn = 0;
         this.phaseTimedOut = false;
         this.phaseTimeLeft = this.getPhaseTime(this.phase);
     }
@@ -110,13 +129,14 @@ export class GameManager {
         cell.units = cell.units.filter(u => u !== unit);
         cell.owner = cell.units.length ? cell.units[0].player : null;
 
-        this.units[1] = this.units[1].filter(u => u !== unit);
+        this.units[unit.player] = this.units[unit.player].filter(u => u !== unit);
 
         if (this.selectedPlacementUnit === unit) {
             this.selectedPlacementUnit = null;
         }
 
         this.unitsLeft[this.currentPlayer] += 1;
+        this.unitTypesLeft[this.currentPlayer][unit.type] += 1;
 
         return true;
     }
@@ -131,6 +151,7 @@ export class GameManager {
     placeUnit(coords) {
         /* Places selected unit from the panel in the desired cell of the spawn zone during placement phase.*/
         if (!this.unitsLeft[this.currentPlayer]) return false;
+        if (!this.canPlaceUnitType(this.selectedPlacementUnit, this.currentPlayer)) return false;
         if (!this.isInSpawnZone(this.currentPlayer, coords.y)) return false;
         const cell = this.grid.matrix[coords.y][coords.x];
         const unit = this.createUnit(this.selectedPlacementUnit, this.currentPlayer, coords.x, coords.y);
@@ -140,7 +161,12 @@ export class GameManager {
         cell.owner = this.currentPlayer;
         this.selectedPlacementUnit = null;
         this.unitsLeft[this.currentPlayer] -= 1;
+        this.unitTypesLeft[this.currentPlayer][unit.type] -= 1;
         return true;
+    }
+
+    canPlaceUnitType(type, player = this.currentPlayer) {
+        return !!type && (this.unitTypesLeft[player]?.[type] || 0) > 0;
     }
 
     canStackUnit(cell, unit) {
@@ -209,7 +235,7 @@ export class GameManager {
             { type: UnitType.SOLDIER, cssClass: '.soldier'},
             { type: UnitType.RIDER, cssClass: '.rider'},
             { type: UnitType.TANK, cssClass: '.tank'},
-        ];
+        ].filter(({ type }) => (this.initialUnits[type] || 0) > 0);
  
         unitTypes.forEach(({ type, cssClass }) => {
             const container = document.querySelector(cssClass);
@@ -229,6 +255,9 @@ export class GameManager {
     performAttack(attacker, defender) {
         if (!attacker || !defender) return;
         const attackResult = attacker.attack(defender);
+        if (!attackResult) return false;
+
+        this.recordAction();
 
         if (defender.health <= 0) {
             const cell = this.grid.matrix[defender.y][defender.x];
@@ -240,8 +269,59 @@ export class GameManager {
         return attackResult;
     }
 
+    applyCellEffect(unit) {
+        if (!unit) return null;
+
+        const cell = this.grid.matrix[unit.y][unit.x];
+
+        switch (cell.type) {
+            case CellType.BONUS_ATK:
+                unit.force += 1;
+                cell.type = CellType.NEUTRAL;
+                return `${unit.type} gained +1 attack`;
+
+            case CellType.BONUS_DEF:
+                unit.maxHealth += 1;
+                unit.health += 1;
+                cell.type = CellType.NEUTRAL;
+                return `${unit.type} gained +1 health`;
+
+            case CellType.TRAP:
+                unit.trapDebuff = true;
+                unit.takeDamage(1);
+                cell.type = CellType.NEUTRAL;
+                if (!unit.alive) {
+                    cell.units = cell.units.filter(u => u !== unit);
+                    cell.owner = cell.units.length ? cell.units[0].player : null;
+                    this.units[unit.player] = this.units[unit.player].filter(u => u !== unit);
+                }
+                return `${unit.type} stepped on a trap and lost 1 health`;
+
+            default:
+                return null;
+        }
+    }
+
+    recordAction() {
+        this.actionsThisTurn += 1;
+    }
+
+    hasRemainingMovement() {
+        return this.units[this.currentPlayer].some(unit =>
+            unit.alive &&
+            !unit.hasMoved &&
+            this.getValidMoves(unit).length > 0
+        );
+    }
+
+    shouldAutoEndTurn() {
+        return this.actionsThisTurn >= this.maxActionsPerTurn ||
+            !this.hasRemainingMovement();
+    }
+
     reset() {
         this.grid = new Grid(this.level.gridSize);
+        this.grid.generateSpecials(this.level);
 
         this.units = { 1: [], 2: [] };
 
@@ -250,9 +330,11 @@ export class GameManager {
         this.turnCount = 1;
 
         this.unitsLeft = {
-            1: this.level.unitsPerPlayer,
-            2: this.level.unitsPerPlayer,
+            1: this.unitsPerPlayer,
+            2: this.unitsPerPlayer,
         };
+        this.unitTypesLeft = this.#createUnitTypesLeft();
+        this.actionsThisTurn = 0;
 
         this.selectedUnit = null;
         this.selectedPlacementUnit = null;
@@ -270,4 +352,3 @@ export class GameManager {
         this.setPhase(GamePhase.PLACEMENT);
     }
 }
-

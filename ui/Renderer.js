@@ -17,15 +17,15 @@ export class Renderer {
 
         this.loadAssets();
 
-        this._resize();
-        window.addEventListener('resize', () => this._resize());
+        this.#resize();
+        window.addEventListener('resize', () => this.#resize());
         
         this.canvas.addEventListener('mousemove', (e) => {
             this.hoveredCell = this.getGridCoords(e);
         });
     }
 
-    _resize() {
+    #resize() {
         const container = this.canvas.parentElement;
         const size = Math.min(container.clientWidth, container.clientHeight, 620);
         this.canvas.width = size;
@@ -77,6 +77,7 @@ export class Renderer {
         }
 
         ctx.drawImage(this.tileLibrary[tileIndex], px, py, cs, cs);
+
     }
 
     #drawCellUnits(ctx, cell, gm, px, py, cs) {
