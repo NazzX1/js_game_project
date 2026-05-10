@@ -14,6 +14,9 @@ export class Unit {
         this.x         = x;
         this.y         = y;
 
+        this.minAttackRange = stats.minAttackRange;
+        this.maxAttackRange = stats.maxAttackRange;
+
         this.hasMoved    = false;
         this.hasActed    = false;
         this.isDefending = false;
@@ -79,6 +82,7 @@ export class Unit {
         return true;
     }
 
+    /* BFS - deprecated
     getValidMoves(grid) {
         if (!grid) return [];
 
@@ -112,5 +116,80 @@ export class Unit {
         }
 
         return moves;
+    }
+    */
+
+    getValidMoves(grid) {
+
+        const moves = [];
+
+        const directions = [
+            [1,0],
+            [-1,0],
+            [0,1],
+            [0,-1]
+        ];
+
+        for (const [dx, dy] of directions) {
+
+            for (let step = 1; step <= this.moveRange; step++) {
+
+                const x = this.x + dx * step;
+                const y = this.y + dy * step;
+
+                if (!grid.isInBounds(x, y)) break;
+
+                const cell = grid.matrix[y][x];
+
+                const canEnter =
+                    cell.units.length === 0 ||
+                    (
+                        cell.units.length < 3 &&
+                        cell.units[0].player === this.player &&
+                        cell.units[0].type === this.type
+                    );
+
+                if (!canEnter) break;
+
+                moves.push({ x, y });
+            }
+        }
+
+        return moves;
+    }
+
+    getValidAttacks(grid) {
+        if (!grid) return [];
+
+        const attacks = [];
+
+        const directions = [
+            [1, 0],
+            [-1, 0],
+            [0, 1],
+            [0, -1]
+        ];
+
+        for (const [dx, dy] of directions) {
+            for (let step = this.minAttackRange; step <= this.maxAttackRange; step++) {
+                const x = this.x + dx * step;
+                const y = this.y + dy * step;
+
+                if (!grid.isInBounds(x, y)) break;
+
+                const cell = grid.matrix[y][x];
+
+                const hasEnemy =
+                    cell.units.length > 0 &&
+                    cell.units[0].player !== this.player;
+
+                if (hasEnemy) {
+                    attacks.push({ x, y });
+                    break;
+                }
+            }
+        }
+
+        return attacks;
     }
 }

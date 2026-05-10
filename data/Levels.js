@@ -21,8 +21,9 @@ export const Levels = {
                 health: 3,
                 directions: [
                     [-1, 0], [1, 0], [0, -1], [0, 1],
-                    [-1, -1], [-1, 1], [1, -1], [1, 1]
                 ],
+                minAttackRange: 1,
+                maxAttackRange: 1,
                 asset: './assets/units/soldier.png'  
             },
             [UnitType.RIDER]:   { 
@@ -32,6 +33,8 @@ export const Levels = {
                 name: 'Cavalier',
                 health: 4,
                 directions: [[0, -1]],
+                minAttackRange: 1,
+                maxAttackRange: 2,
                 asset: './assets/units/rider.png'
             },
             [UnitType.TANK]:    { 
@@ -43,6 +46,8 @@ export const Levels = {
                 directions: [
                     [-1, 0], [1, 0], [0, -1], [0, 1]
                 ],
+                minAttackRange: 2,
+                maxAttackRange: 4,
                 asset: './assets/units/tank.png' 
             },
         },

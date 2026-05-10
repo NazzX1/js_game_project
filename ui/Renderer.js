@@ -3,16 +3,17 @@ import { COLORS } from '../data/Colors.js';
 
 export class Renderer {
     constructor(canvasId, gridSize) {
-        this.canvas   = document.getElementById(canvasId);
-        this.ctx      = this.canvas.getContext('2d');
+        this.canvas = document.getElementById(canvasId);
+        this.ctx = this.canvas.getContext('2d');
         this.gridSize = gridSize;
 
-        this.animations    = [];   
-        this.tileLibrary   = [];
-        this.unitAssets    = {};
-        this.pulseTime     = 0;
-        this.hoveredCell   = null; 
-        this.isReady       = false;
+        this.animations = [];   
+        this.tileLibrary = [];
+        this.unitAssets = {};
+        this.pulseTime = 0;
+        this.hoveredCell = null; 
+        this.isReady = false;
+        this.attackIcon = null;
 
         this.loadAssets();
 
@@ -49,7 +50,7 @@ export class Renderer {
 
     #drawCells(ctx, gm) {
         if (!this.isReady) return;
-        const { grid, selectedUnit, validMoves = [] } = gm;
+        const { grid, selectedUnit, validMoves = [] , validAttacks = []} = gm;
         const cs = this.cellSize;
 
         for (let r = 0; r < this.gridSize; r++) {
@@ -61,7 +62,7 @@ export class Renderer {
                 this.#drawCellBackground(ctx, cell, px, py, cs);
                 this.#drawCellUnits(ctx, cell, gm, px, py, cs);
                 this.#drawCellBorder(ctx, cell, px, py, cs);
-                this.#drawOverlays(ctx, cell, r, c, px, py, cs, gm, selectedUnit, validMoves);
+                this.#drawOverlays(ctx, cell, r, c, px, py, cs, gm, selectedUnit, validMoves, validAttacks);
             }
         }
     }
@@ -158,10 +159,11 @@ export class Renderer {
         ctx.strokeRect(px, py, cs, cs);
     }
 
-    #drawOverlays(ctx, cell, r, c, px, py, cs, gm, selectedUnit, validMoves = []) {
+    #drawOverlays(ctx, cell, r, c, px, py, cs, gm, selectedUnit, validMoves = [], validAttacks = []) {
         const isSelected = selectedUnit && selectedUnit.x === c && selectedUnit.y === r;
         const isHovered  = this.hoveredCell && this.hoveredCell.x === c && this.hoveredCell.y === r;
         const isValidMove = validMoves.some(m => m.x === c && m.y === r);
+        const isValidAttack = validAttacks.some(a => a.x === c && a.y === r);
 
         const shouldShowSpawnZone =
             gm.phase === GamePhase.PLACEMENT &&
@@ -183,32 +185,27 @@ export class Renderer {
             const size = cs * 0.22;
             const offset = 4;
 
-            ctx.strokeStyle = COLORS.red;
+            if (gm.currentPlayer === 1) {
+                ctx.strokeStyle = COLORS.p1Unit;
+            }
+            else {
+                ctx.strokeStyle = COLORS.p2Unit; 
+            }
             ctx.lineWidth = 3;
+            this.#drawCornerBrackets(ctx, px, py, cs, size, offset);
+        }
 
-            ctx.beginPath();
-            ctx.moveTo(px + offset, py + size);
-            ctx.lineTo(px + offset, py + offset);
-            ctx.lineTo(px + size, py + offset);
-            ctx.stroke();
+        if (isValidAttack && !isSelected) {
 
-            ctx.beginPath();
-            ctx.moveTo(px + cs - size, py + offset);
-            ctx.lineTo(px + cs - offset, py + offset);
-            ctx.lineTo(px + cs - offset, py + size);
-            ctx.stroke();
+            const size = cs * 0.42;
 
-            ctx.beginPath();
-            ctx.moveTo(px + offset, py + cs - size);
-            ctx.lineTo(px + offset, py + cs - offset);
-            ctx.lineTo(px + size, py + cs - offset);
-            ctx.stroke();
-
-            ctx.beginPath();
-            ctx.moveTo(px + cs - size, py + cs - offset);
-            ctx.lineTo(px + cs - offset, py + cs - offset);
-            ctx.lineTo(px + cs - offset, py + cs - size);
-            ctx.stroke();
+            ctx.drawImage(
+                this.attackIcon,
+                px + (cs - size) / 2,
+                py + (cs - size) / 2,
+                size,
+                size
+            );
         }
 
         if (isHovered && !isSelected) {
@@ -221,6 +218,32 @@ export class Renderer {
             ctx.lineWidth = 2.5;
             ctx.strokeRect(px + 1, py + 1, cs - 2, cs - 2);
         }
+    }
+
+    #drawCornerBrackets(ctx, px, py, cs, size, offset) {
+        ctx.beginPath();
+        ctx.moveTo(px + offset, py + size);
+        ctx.lineTo(px + offset, py + offset);
+        ctx.lineTo(px + size, py + offset);
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.moveTo(px + cs - size, py + offset);
+        ctx.lineTo(px + cs - offset, py + offset);
+        ctx.lineTo(px + cs - offset, py + size);
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.moveTo(px + offset, py + cs - size);
+        ctx.lineTo(px + offset, py + cs - offset);
+        ctx.lineTo(px + size, py + cs - offset);
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.moveTo(px + cs - size, py + cs - offset);
+        ctx.lineTo(px + cs - offset, py + cs - offset);
+        ctx.lineTo(px + cs - offset, py + cs - size);
+        ctx.stroke();
     }
 
     #getSpriteIndex(type) {
@@ -270,6 +293,9 @@ export class Renderer {
                 });
             })
         );
+
+        this.attackIcon = new Image();
+        this.attackIcon.src = 'assets/Black_Sword.png';
 
         this.isReady = true;
     }

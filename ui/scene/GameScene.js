@@ -44,6 +44,9 @@ export class GameScene extends Scene {
         this.rollDiceButton.disabled = false;
         this.diceValueText = document.getElementById("dice-value");
         this.diceValueText.innerHTML = "";
+
+        this.unitsPanel = document.getElementById("units-panel");
+        this.unitsPanel.classList.remove("hidden");
         
         if (this.placementModal) {
             this.placementModal.classList.add('open');
@@ -101,6 +104,7 @@ export class GameScene extends Scene {
                 this.#updatePhaseDisplay();
                 this.#updateTimerDisplay();
                 document.querySelector(".placement-hint")?.classList.add("hidden");
+                this.unitsPanel.classList.add("hidden");
             };
         }
 
@@ -117,6 +121,12 @@ export class GameScene extends Scene {
                 this.logic.nextPlayerTurn();
                 this.#updateTimerDisplay();
                 this.#updatePlayerTurnDisplay();
+                if (this.logic.units) {
+                    console.log(this.logic.units);
+                    (this.logic.units[this.logic.currentPlayer]).map(unit => {
+                        unit.resetTurn();
+                    });
+                }
             };
         }
 
@@ -306,8 +316,7 @@ export class GameScene extends Scene {
         }
 
         if (this.logic.phase === GamePhase.MOVEMENT) {
-            if (this.logic.selectedUnit) {
-
+            if (this.logic.selectedUnit && !this.logic.selectedUnit.hasMoved) {
                 const isValidMove = this.logic.validMoves.some(
                     move => move.x === coords.x && move.y === coords.y
                 );
@@ -321,25 +330,12 @@ export class GameScene extends Scene {
 
                     if (moved) return;
                 }
-
-                if (
-                    clickedUnit &&
-                    clickedUnit.player === this.logic.currentPlayer &&
-                    clickedUnit !== this.logic.selectedUnit
-                ) {
-                    this.logic.selectedUnit = clickedUnit;
-                    this.logic.validMoves = this.logic.getValidMoves(clickedUnit);
-                    return;
-                }
             }
-
             if (clickedUnit && clickedUnit.player === this.logic.currentPlayer) {
-                this.logic.selectedUnit = clickedUnit;
-                this.logic.validMoves = this.logic.getValidMoves(clickedUnit);
+                this.#selectBattleUnit(clickedUnit);
                 return;
             }
         }
-
     }
 
     #handleCanvasRightClick(event) {
@@ -357,6 +353,18 @@ export class GameScene extends Scene {
             const unitsLeftParagagraph = document.getElementById("units-left");
             unitsLeftParagagraph.innerText = this.logic.unitsLeft[this.logic.currentPlayer];
         }
+    }
+
+    #selectBattleUnit(unit) {
+        this.logic.selectedUnit = unit;
+
+        this.logic.validMoves = unit.hasMoved
+            ? []
+            : this.logic.getValidMoves(unit);
+
+        this.logic.validAttacks = unit.hasActed
+            ? []
+            : this.logic.getValidAttacks(unit);
     }
 
     #moveUnit(unit, x, y) {

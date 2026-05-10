@@ -309,3 +309,7 @@
     color: var(--gold);
     text-transform: uppercase;
 }
+
+#placement-done-btn {
+    width: 100%;
+}

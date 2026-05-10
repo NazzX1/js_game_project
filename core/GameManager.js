@@ -136,6 +136,7 @@ export class GameManager {
         const unit = this.createUnit(this.selectedPlacementUnit, this.currentPlayer, coords.x, coords.y);
         if (!this.canStackUnit(cell, unit)) return false;
         cell.units.push(unit);
+        this.units[this.currentPlayer].push(unit);
         cell.owner = this.currentPlayer;
         this.selectedPlacementUnit = null;
         this.unitsLeft[this.currentPlayer] -= 1;
@@ -198,8 +199,9 @@ export class GameManager {
         return unit.getValidMoves(this.grid);
     }
 
-    getValidCaptures(unit) {
-        return [];
+    getValidAttacks(unit) {
+        if (!unit) return [];
+        return unit.getValidAttacks(this.grid);
     }
 
     renderPlacementUnits() {
