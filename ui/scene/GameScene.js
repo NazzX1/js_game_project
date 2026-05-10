@@ -33,6 +33,7 @@ export class GameScene extends Scene {
         this.phaseDisplay = document.getElementById('phase-display');
         this.placementModal = document.getElementById('placement-modal');
         this. unitsLeftParagraph = document.getElementById("units-left");
+        this.victoryModal = document.getElementById("victory-modal");
         this.errorModal = document.getElementById("error-modal");
         this.attackModal = document.getElementById("attack-modal");
         this.movesLeftText = document.getElementById("moves-left");
@@ -58,6 +59,15 @@ export class GameScene extends Scene {
                 if (e.target === this.placementModal) {
                     this.placementModal.classList.remove('open');
                 }
+            };
+        }
+
+        if (this.victoryModal) {
+            const btn = document.getElementById('victory-modal-btn');
+            if (btn) btn.onclick = () => {
+                this.victoryModal.classList.remove('open');
+                this.app.switchScene(SceneType.HOME);
+                this.logic.reset();
             };
         }
 
@@ -108,7 +118,7 @@ export class GameScene extends Scene {
         if (doneButton) {
             doneButton.classList.toggle('hidden', this.logic.phase !== GamePhase.PLACEMENT);
             doneButton.onclick = () => {
-                if (this.logic.phase !== GamePhase.PLACEMENT) return;
+                if (this.logic.phase !== GamePhase.PLACEMENT || this.logic.dice.isRolling) return;
 
                 if (!this.#verifyPlayerHasPlacedUnits(1)) return;
 
@@ -139,6 +149,7 @@ export class GameScene extends Scene {
         const endTurnButton = document.getElementById('end-turn-btn');
         if (endTurnButton) {
             endTurnButton.onclick = () => {
+                if (this.logic.dice.isRolling) return;
                 if (this.logic.phase === GamePhase.PLACEMENT) {
                     if (!this.#verifyPlayerHasPlacedUnits(this.logic.currentPlayer)) {
                         return;
@@ -194,8 +205,12 @@ export class GameScene extends Scene {
         };
         this.phaseDisplay.textContent = phaseLabels[this.logic.phase] || this.logic.phase;
 
+        if (this.logic.phase === GamePhase.FINISHED) {
+            this.victoryModal.classList.add("open");
+            document.getElementById("victory-text").innerText = `PLAYER ${this.logic.winner} WINS!`;
+        }
+
         if (this.diceRollDiv) {
-            // Show the dice roll panel strictly during the Movement phase
             this.diceRollDiv.classList.toggle('hidden', this.logic.phase !== GamePhase.MOVEMENT);
         }
     }
@@ -284,7 +299,7 @@ export class GameScene extends Scene {
     }
 
     #handleCanvasClick(event) {
-        if (!this.logic) return;
+        if (!this.logic || this.logic.dice.isRolling) return;
 
         const coords = this.renderer.getGridCoords(event);
         if (!coords) return;
@@ -390,7 +405,7 @@ export class GameScene extends Scene {
 
     #handleCanvasRightClick(event) {
         event.preventDefault();
-        if (!this.logic) return;
+        if (!this.logic || this.logic.dice.isRolling) return;
 
         const coords = this.renderer.getGridCoords(event);
         if (!coords) return;
@@ -502,6 +517,8 @@ export class GameScene extends Scene {
         this.logic.selectedUnit = null;
         this.logic.validMoves = [];
         this.logic.validAttacks = [];
+
+        this.logic.checkWinCondition();
 
         return true;
     }

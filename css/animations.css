@@ -39,3 +39,8 @@
     50% { transform: rotate(12deg) scale(0.95); }
     100% { transform: rotate(-12deg) scale(1.05); }
 }
+
+.scale-pulse-text {
+    display: inline-block;
+    animation: scale-pulse 2s ease-in-out infinite;
+}

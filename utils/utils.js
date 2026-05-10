@@ -17,7 +17,6 @@ export async function createTileLibrary(src, spriteSize = 16) {
             canvas.height = spriteSize;
             const ctx = canvas.getContext('2d');
             
-            // Cut it out!
             ctx.drawImage(
                 img, 
                 x * spriteSize, y * spriteSize, spriteSize, spriteSize, 

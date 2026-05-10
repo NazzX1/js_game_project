@@ -43,6 +43,7 @@ export class GameManager {
         this.validAttacks = [];
         this.selectedPlacementUnit = null;
         this.ai = new AIPlayer(this);
+        this.winner = null;
 
         this.phaseTimers = this.level.phaseTimers || {
             [GamePhase.PLACEMENT]: 30,
@@ -264,7 +265,33 @@ export class GameManager {
             this.units[defender.player] = this.units[defender.player].filter(u => u !== defender);
         }
 
+        this.checkWinCondition();
+
         return attackResult;
+    }
+
+    checkWinCondition() {
+        if (this.phase === GamePhase.PLACEMENT || this.phase === GamePhase.FINISHED) {
+            return null;
+        }
+
+        const territory = this.getTerritory();
+        const p1Units = this.units[1].length;
+        const p2Units = this.units[2].length;
+
+        if (territory.p1 >= this.level.victoryCells || p2Units === 0) {
+            this.setPhase(GamePhase.FINISHED);
+            this.winner = 1;
+            return 1;
+        }
+
+        if (territory.p2 >= this.level.victoryCells || p1Units === 0) {
+            this.setPhase(GamePhase.FINISHED);
+            this.winner = 2;
+            return 2;
+        }
+
+        return null;
     }
 
     applyCellEffect(unit) {
@@ -293,6 +320,7 @@ export class GameManager {
                     cell.owner = cell.units.length ? cell.units[0].player : null;
                     this.units[unit.player] = this.units[unit.player].filter(u => u !== unit);
                 }
+                this.checkWinCondition();
                 return `${unit.type} stepped on a trap and lost 1 health`;
 
             default:
@@ -336,6 +364,7 @@ export class GameManager {
 
         this.selectedUnit = null;
         this.selectedPlacementUnit = null;
+        this.winner = null;
 
         this.validMoves = [];
         this.validAttacks = [];

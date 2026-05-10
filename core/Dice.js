@@ -15,7 +15,9 @@ export class Dice {
         this.startDiceImgContainer = document.getElementById("start-dice-img-container");
         this.startDiceValueText = document.getElementById("start-dice-value");
         this.startDiceTurnText = document.getElementById("start-dice-turn-text");
+        this.startingPlayerText = document.getElementById("starting-player");
         this.startContinueBtn = document.getElementById("start-continue-btn");
+        this.isRolling = false;
         this.reset();
     }
 
@@ -25,6 +27,7 @@ export class Dice {
 
     async loadAssets() {
         const dice_paths = [];
+        // Load a single set of dice assets
         for (let v = 1; v <= 6; v++) {
             dice_paths.push({ value: v, path: `./assets/dice/dice_${v}.png` });
         }
@@ -33,6 +36,7 @@ export class Dice {
             return new Promise(resolve => {
                 const img = new Image();
                 img.onload = () => {
+                    // Store the same image for both players as there's only one asset type
                     this.assets[1][d.value] = img;
                     this.assets[2][d.value] = img;
                     resolve();
@@ -86,20 +90,22 @@ export class Dice {
         if (valueText) {
             const total = values.length > 1 ? values.reduce((a, b) => a + b, 0) : values[0];
             const detail = values.length > 1 ? ` (${values.join(' + ')})` : ''; // Only show detail if multiple dice
-            valueText.innerHTML += `<div class="panel-label" id="dice-value">${messagePrefix} ${total}${detail}</div>`;
+            valueText.innerHTML += `<p>${messagePrefix} ${total}${detail}</p>`;
         }
     }
 
     async performInitialRollsFlow() {
         this.reset();
+        this.isRolling = true;
         if (this.startPlayerModal) this.startPlayerModal.classList.add('open');
         if (this.startDiceTurnText) this.startDiceTurnText.innerText = "Determining starting player...";
 
+        // Roll 1 die for each player to determine who starts
         this.rolls[1] = this.roll();
         this.rolls[2] = this.roll();
 
-        await this.#animateRoll(1, this.rolls[1], "Player 1 :", this.startDiceImgContainer, this.startDiceValueText);
-        await this.#animateRoll(2, this.rolls[2], "Player 2 :", this.startDiceImgContainer, this.startDiceValueText);
+        await this.#animateRoll(1, this.rolls[1], "Player 1 got", this.startDiceImgContainer, this.startDiceValueText);
+        await this.#animateRoll(2, this.rolls[2], "Player 2 got", this.startDiceImgContainer, this.startDiceValueText);
 
         const winner = this.determineStartingPlayer();
         if (this.startDiceTurnText) this.startDiceTurnText.innerText = `Player ${winner} starts the battle!`;
@@ -118,6 +124,7 @@ export class Dice {
         }
 
         if (this.startPlayerModal) this.startPlayerModal.classList.remove('open');
+        this.isRolling = false;
     }
 
     determineStartingPlayer() {
@@ -133,6 +140,7 @@ export class Dice {
         this.rolls = { 1: null, 2: null };
         this.playerTurn = 1;
         this.bonus = 0;
+        this.isRolling = false;
 
         if (this.diceRollDiv) {
             this.diceRollDiv.classList.add("hidden");
@@ -163,6 +171,10 @@ export class Dice {
             this.startDiceImgContainer.innerHTML = "";
         }
 
+        if (this.startingPlayerText) {
+            this.startingPlayerText.innerText = "";
+        }
+
         if (this.diceTurnText) {
             this.diceTurnText.innerText = "Player 1 roll";
         }
@@ -183,9 +195,11 @@ export class Dice {
         if (this.diceTurnText) this.diceTurnText.innerText = `Player ${player}: Rolling for Attack Bonus...`;
         if (this.rollDiceButton) this.rollDiceButton.disabled = true;
 
+        this.isRolling = true;
         await new Promise(r => setTimeout(r, 1000));
         this.bonus = this.roll();
         await this.#animateRoll(player, this.bonus, "Attack Bonus Gained: +", this.diceImgContainer, this.diceValueText);
+        this.isRolling = false;
 
         return this.bonus;
     }
