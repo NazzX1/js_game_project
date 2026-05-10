@@ -2,6 +2,7 @@ import { Scene }      from './Scene.js';
 import { SceneType, GamePhase, UnitType, ActionType } from '../../data/Enums.js';
 import { GameManager } from '../../core/GameManager.js';
 import { Renderer }    from '../Renderer.js';
+import { COLORS } from '../../data/Colors.js';
 
 export class GameScene extends Scene {
     
@@ -32,6 +33,8 @@ export class GameScene extends Scene {
         this.phaseDisplay = document.getElementById('phase-display');
         this.placementModal = document.getElementById('placement-modal');
         this. unitsLeftParagraph = document.getElementById("units-left");
+        this.errorModal = document.getElementById("error-modal");
+        this.attackModal = document.getElementById("attack-modal");
         if (this.unitsLeftParagraph) {
             this.unitsLeftParagraph.innerText = this.logic.level.unitsPerPlayer;
         }
@@ -47,6 +50,8 @@ export class GameScene extends Scene {
 
         this.unitsPanel = document.getElementById("units-panel");
         this.unitsPanel.classList.remove("hidden");
+
+        this.totalOccupiedCells = document.getElementsByClassName("total-occupied-cells");
         
         if (this.placementModal) {
             this.placementModal.classList.add('open');
@@ -55,6 +60,29 @@ export class GameScene extends Scene {
             this.placementModal.onclick = (e) => {
                 if (e.target === this.placementModal) {
                     this.placementModal.classList.remove('open');
+                }
+            };
+        }
+
+        if (this.errorModal) {
+            const btn = document.getElementById('error-modal-btn');
+            if (btn) btn.onclick = () => this.errorModal.classList.remove('open');
+            this.errorModal.onclick = (e) => {
+                if (e.target === this.errorModal) {
+                    this.errorModal.classList.remove('open');
+                }
+            };
+        }
+
+        if (this.attackModal) {
+            const cancelButton = document.getElementById('cancel-attack-btn');
+            if (cancelButton) {
+                cancelButton.onclick = () => this.attackModal.classList.remove('open');
+            }
+
+            this.attackModal.onclick = (e) => {
+                if (e.target === this.attackModal) {
+                    this.attackModal.classList.remove('open');
                 }
             };
         }
@@ -88,6 +116,7 @@ export class GameScene extends Scene {
                 if (this.vsAI) {
                     if (this.logic.unitsLeft[2] === this.logic.level.unitsPerPlayer) {
                         this.logic.ai.placeUnits();
+                        this.#updateOccupiedCellsDisplay();
                     }
                 } else {
                     if (!this.#verifyPlayerHasPlacedUnits(2)) return;
@@ -122,7 +151,6 @@ export class GameScene extends Scene {
                 this.#updateTimerDisplay();
                 this.#updatePlayerTurnDisplay();
                 if (this.logic.units) {
-                    console.log(this.logic.units);
                     (this.logic.units[this.logic.currentPlayer]).map(unit => {
                         unit.resetTurn();
                     });
@@ -183,9 +211,16 @@ export class GameScene extends Scene {
     }
 
     #updatePlayerTurnDisplay() {
+        const activePlayerDiv = document.getElementById("active-player-role");
         const activePlayerNumber = document.getElementById('active-player-number');
         if (activePlayerNumber) {
             activePlayerNumber.innerText = this.logic.currentPlayer;
+            if (this.logic.currentPlayer === 1) {
+                activePlayerDiv.style.backgroundColor = COLORS.p1Unit;
+            }
+            else {
+                activePlayerDiv.style.backgroundColor = COLORS.p2Unit;
+            }
         }
     }
 
@@ -226,9 +261,13 @@ export class GameScene extends Scene {
         if (p1 > p2) {
             this.logic.setFirstPlayer(1);
             startingPlayerText.innerText = "Player 1 starts";
-        } else {
+        } else if (p2 > p1) {
             this.logic.setFirstPlayer(2);
             startingPlayerText.innerText = "Player 2 starts";
+        } else {
+            let x = Math.ceil(Math.random() * 2);
+            this.logic.setFirstPlayer(x);
+            startingPlayerText.innerText = `Player ${x} starts`;
         }
 
         this.rollDiceButton.disabled = true;
@@ -237,7 +276,8 @@ export class GameScene extends Scene {
 
     #verifyPlayerHasPlacedUnits(player) {
         if (this.logic.unitsLeft[player] === this.logic.level.unitsPerPlayer) {
-            alert(`Player ${player}: place at least one unit on the grid!`);
+            this.errorModal.classList.add("open");
+            document.getElementById("error-text").innerText = `Player ${player}: place at least one unit on the grid!`
             return false;
         }
 
@@ -270,6 +310,13 @@ export class GameScene extends Scene {
         });
     }
 
+    #updateOccupiedCellsDisplay() {
+        const territory = this.logic.getTerritory();
+
+        this.totalOccupiedCells[0].innerText = territory.p1;
+        this.totalOccupiedCells[1].innerText = territory.p2;
+    }
+
     #handleCanvasClick(event) {
         if (!this.logic) return;
 
@@ -288,6 +335,7 @@ export class GameScene extends Scene {
                 if (placed) {
                     this.unitsLeftParagraph.innerText = this.logic.unitsLeft[this.logic.currentPlayer];
                     this.logic.selectedPlacementUnit = null;
+                    this.#updateOccupiedCellsDisplay();
                 }
 
                 return;
@@ -303,6 +351,7 @@ export class GameScene extends Scene {
                 
                 if (moved) {
                     this.logic.selectedUnit = null;
+                    this.#updateOccupiedCellsDisplay();
                 }
                 return;
             }
@@ -316,6 +365,15 @@ export class GameScene extends Scene {
         }
 
         if (this.logic.phase === GamePhase.MOVEMENT) {
+
+            if (clickedUnit && clickedUnit === this.logic.selectedUnit) {
+                this.logic.selectedUnit = null;
+                this.logic.validMoves = [];
+                this.logic.validAttacks = [];
+                return;
+            }
+
+            // Move selected unit
             if (this.logic.selectedUnit && !this.logic.selectedUnit.hasMoved) {
                 const isValidMove = this.logic.validMoves.some(
                     move => move.x === coords.x && move.y === coords.y
@@ -328,14 +386,35 @@ export class GameScene extends Scene {
                         coords.y
                     );
 
-                    if (moved) return;
+                    if (moved) {
+                        this.#updateOccupiedCellsDisplay();
+                        return;
+                    }
                 }
             }
+
+            // Show attack modal when clicking valid attack
+            if (this.logic.selectedUnit && !this.logic.selectedUnit.hasActed) {
+                const isValidAttack = this.logic.validAttacks.some(
+                    attack => attack.x === coords.x && attack.y === coords.y
+                );
+
+                if (isValidAttack) {
+                    const attacker = this.logic.selectedUnit;
+                    const defender = clickedUnit;
+
+                    this.#showAttackModal(attacker, defender);
+                    return;
+                }
+            }
+
+            // Select own unit
             if (clickedUnit && clickedUnit.player === this.logic.currentPlayer) {
                 this.#selectBattleUnit(clickedUnit);
                 return;
             }
         }
+
     }
 
     #handleCanvasRightClick(event) {
@@ -353,6 +432,58 @@ export class GameScene extends Scene {
             const unitsLeftParagagraph = document.getElementById("units-left");
             unitsLeftParagagraph.innerText = this.logic.unitsLeft[this.logic.currentPlayer];
         }
+    }
+
+    #showAttackModal(attacker, defender) {
+        if (!this.attackModal || !attacker || !defender) return;
+
+        const attackerName = document.getElementById("attacker-name");
+        if (attackerName) {
+            attackerName.innerText = attacker.type;
+        }
+        const attackerHp = document.getElementById("attacker-hp");
+        if (attackerHp) {
+            attackerHp.innerText = attacker.health;
+        }
+        const attackerAttack = document.getElementById("attacker-attack");
+        if (attackerAttack) {
+            attackerAttack.innerText = attacker.force;
+        }
+
+        const defenderName = document.getElementById("defender-name");
+        if (defenderName) {
+            defenderName.innerText = defender.type;
+        }
+        const defenderHp = document.getElementById("defender-hp");
+        if (defenderHp) {
+            defenderHp.innerText = defender.health;
+        }
+        const defenderDefense = document.getElementById("defender-defense");
+        if (defenderDefense) {
+            defenderDefense.innerText = defender.force;
+        }
+
+        const battleTip = document.getElementById("battle-tip");
+        if (battleTip) {
+            battleTip.innerText =
+                `${attacker.type} attacks ${defender.type}`;
+        }
+
+        const attackButton = document.getElementById("confirm-attack-btn");
+        if (attackButton) {
+            attackButton.onclick = () => {
+                this.#performAttack(attacker, defender);
+                this.attackModal.classList.remove("open");
+            };
+        }
+
+        this.attackModal.classList.add("open");
+    }
+
+    #performAttack(attacker, defender) {
+        if (!attacker || !defender) return;
+        this.logic.performAttack(attacker, defender);
+        this.#updateOccupiedCellsDisplay();
     }
 
     #selectBattleUnit(unit) {

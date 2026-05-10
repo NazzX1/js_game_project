@@ -96,6 +96,10 @@
                     </div>
                     <p>Units left : <span id="units-left">5</span></p>
                 </div>
+
+                <div class="hidden" id="moves-panel">
+                    <p>Moves Left : <span id="moves-left">2</span></p>
+                </div>
                 
                 <div class="panel-actions">
                     <button class="primary-btn" id="end-turn-btn">Fin de Tour </button>
@@ -109,6 +113,12 @@
                 <div class="phase-block">
                     <div class="panel-label">Game Phase</div>
                     <div id="phase-display" class="phase-display">Placement</div>
+                </div>
+
+                <div id="total-occupied-cells-block">
+                    <div class="panel-label">Cells occupied</div>
+                    <p>Player 1 : <span class="total-occupied-cells">0</span></p>
+                    <p>Player 2 : <span class="total-occupied-cells">0</span></p>
                 </div>
 
                 <!--
@@ -147,11 +157,82 @@
         <div id="placement-modal" class="container-bg">
             <div class="modal-card">
                 <div>
-                <h2>Placement Phase</h2>
-                <img src="assets/about_icon.png" alt="" class="modal-icon">
+                    <h2>Placement Phase</h2>
+                    <img src="assets/about_icon.png" alt="" class="modal-icon">
                 </div>
                 <p>Arrange your units on the first row before the battle begins. Click one of your units, then click an empty spawn cell to move it.</p>
                 <button class="primary-btn" id="placement-modal-btn">Got it</button>
+            </div>
+        </div>
+
+        <div id="error-modal" class="container-bg">
+            <div class="modal-card">
+                <div>
+                    <h2>Something went wrong !</h2>
+                    <img src="assets/cross_icon.png" alt="" class="modal-icon">
+                </div>
+                <p id="error-text"></p>
+                <button class="primary-btn" id="error-modal-btn">Got it</button>
+            </div>
+        </div>
+
+        <div id="attack-modal" class="container-bg">
+            <div class="attack-modal-card">
+
+                <div class="attack-title">Battle</div>
+
+                <div class="battle-preview">
+
+                    <div class="unit-side attacker">
+                        <div class="unit-avatar soldier"></div>
+                        <h3 id="attacker-name">Soldier</h3>
+
+                        <div class="stat">
+                            <span>HP</span>
+                            <span id="attacker-hp">80</span>
+                        </div>
+
+                        <div class="stat">
+                            <span>Attack</span>
+                            <span id="attacker-attack">25</span>
+                        </div>
+                    </div>
+
+                    <div class="versus">
+                        VS
+                    </div>
+
+                    <div class="unit-side defender">
+                        <div class="unit-avatar tank"></div>
+                        <h3 id="defender-name">Tank</h3>
+
+                        <div class="stat">
+                            <span>HP</span>
+                            <span id="defender-hp">120</span>
+                        </div>
+
+                        <div class="stat">
+                            <span>Defense</span>
+                            <span id="defender-defense">40</span>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="battle-tip" id="battle-tip">
+
+                </div>
+
+                <div class="battle-actions">
+                    <button class="secondary-btn" id="cancel-attack-btn">
+                        Cancel
+                    </button>
+
+                    <button class="primary-btn" id="confirm-attack-btn">
+                        Attack
+                    </button>
+                </div>
+
             </div>
         </div>
 

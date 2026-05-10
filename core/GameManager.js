@@ -226,6 +226,20 @@ export class GameManager {
         });
     }
 
+    performAttack(attacker, defender) {
+        if (!attacker || !defender) return;
+        const attackResult = attacker.attack(defender);
+
+        if (defender.health <= 0) {
+            const cell = this.grid.matrix[defender.y][defender.x];
+            cell.units = cell.units.filter(u => u !== defender);
+            cell.owner = cell.units.length ? cell.units[0].player : null;
+            this.units[defender.player] = this.units[defender.player].filter(u => u !== defender);
+        }
+
+        return attackResult;
+    }
+
     reset() {
         this.grid = new Grid(this.level.gridSize);
 
